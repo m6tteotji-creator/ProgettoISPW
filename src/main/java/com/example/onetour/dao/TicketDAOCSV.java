@@ -84,6 +84,7 @@ public class TicketDAOCSV extends TicketDAO {
         }
     }
 
+    // *** MODIFICA QUI: Ho semplificato drasticamente questo metodo usando isRowMatchingGuide ***
     @Override
     public synchronized List<Ticket> retrievePendingByGuide(String guideEmail) throws TicketNotFoundException {
         if (guideEmail == null || guideEmail.isBlank()) {
@@ -94,20 +95,11 @@ public class TicketDAOCSV extends TicketDAO {
             List<Ticket> res = readFiltered(row -> {
                 if (row.length < 5) return false;
 
+                // Controllo solo lo stato qui, il resto lo delego al metodo helper
                 String st = row[IDX_STATE];
                 if (!TicketState.PENDING.name().equals(st)) return false;
 
-                String tourId = row[IDX_TOUR_ID];
-                if (tourId == null || tourId.isBlank()) return false;
-
-                try {
-                    Tour tour = buildTourDAO().retrieveTourFromId(tourId);
-                    if (tour.getTouristGuide() == null || tour.getTouristGuide().getEmail() == null) return false;
-                    return tour.getTouristGuide().getEmail().equalsIgnoreCase(guideEmail);
-                } catch (SQLException | TourNotFoundException e) {
-                    logger.log(Level.WARNING, "Skipping row: cannot rebuild Tour for tour_id=" + tourId, e);
-                    return false;
-                }
+                return isRowMatchingGuide(row, guideEmail);
             });
 
             if (res.isEmpty()) {
@@ -120,7 +112,7 @@ public class TicketDAOCSV extends TicketDAO {
         }
     }
 
-    // ✅ NUOVO: tutte le richieste della guida (pending + history)
+    // *** MODIFICA QUI: Anche questo metodo ora usa l'helper per ridurre la complessità ***
     @Override
     public synchronized List<Ticket> retrieveByGuide(String guideEmail) throws TicketNotFoundException {
         if (guideEmail == null || guideEmail.isBlank()) {
@@ -130,18 +122,7 @@ public class TicketDAOCSV extends TicketDAO {
         try {
             List<Ticket> res = readFiltered(row -> {
                 if (row.length < 5) return false;
-
-                String tourId = row[IDX_TOUR_ID];
-                if (tourId == null || tourId.isBlank()) return false;
-
-                try {
-                    Tour tour = buildTourDAO().retrieveTourFromId(tourId);
-                    if (tour.getTouristGuide() == null || tour.getTouristGuide().getEmail() == null) return false;
-                    return tour.getTouristGuide().getEmail().equalsIgnoreCase(guideEmail);
-                } catch (SQLException | TourNotFoundException e) {
-                    logger.log(Level.WARNING, "Skipping row: cannot rebuild Tour for tour_id=" + tourId, e);
-                    return false;
-                }
+                return isRowMatchingGuide(row, guideEmail);
             });
 
             if (res.isEmpty()) {
@@ -182,6 +163,20 @@ public class TicketDAOCSV extends TicketDAO {
             rewriteAll(rows);
         } catch (IOException | CsvValidationException e) {
             throw new RuntimeException("CSV persistence error (modifyState)", e);
+        }
+    }
+
+    private boolean isRowMatchingGuide(String[] row, String guideEmail) {
+        String tourId = row[IDX_TOUR_ID];
+        if (tourId == null || tourId.isBlank()) return false;
+
+        try {
+            Tour tour = buildTourDAO().retrieveTourFromId(tourId);
+            if (tour.getTouristGuide() == null || tour.getTouristGuide().getEmail() == null) return false;
+            return tour.getTouristGuide().getEmail().equalsIgnoreCase(guideEmail);
+        } catch (SQLException | TourNotFoundException e) {
+            logger.log(Level.WARNING, "Skipping row: cannot rebuild Tour for tour_id=" + tourId, e);
+            return false;
         }
     }
 

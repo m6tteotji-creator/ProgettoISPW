@@ -3,13 +3,13 @@ package com.example.onetour.graphicController;
 import com.example.onetour.bean.TourBean;
 import com.example.onetour.exception.TourNotFoundException;
 import com.example.onetour.model.Session;
+import com.example.onetour.model.Tour;
 import com.example.onetour.sessionManagement.SessionManagerSingleton;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.util.Callback;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -44,37 +44,45 @@ public class TourListController {
         tourListView.setItems(FXCollections.observableArrayList(beans));
     }
 
+    // *** MODIFICA QUI: Ho rimosso l'annidamento profondo. ***
+    // Invece di scrivere tutta la logica dentro new ListCell, delego a un metodo helper.
     private void setupClickableCells() {
-        tourListView.setCellFactory(new Callback<>() {
+        tourListView.setCellFactory(listView -> new ListCell<>() {
             @Override
-            public ListCell<TourBean> call(ListView<TourBean> listView) {
-                return new ListCell<>() {
-                    @Override
-                    protected void updateItem(TourBean item, boolean empty) {
-                        super.updateItem(item, empty);
-
-                        if (empty || item == null) {
-                            setText(null);
-                            setOnMouseClicked(null);
-                            return;
-                        }
-
-                        String title = (item.getTourName() != null && !item.getTourName().isBlank())
-                                ? item.getTourName()
-                                : "Tour";
-
-                        String city = item.getCityName() != null ? item.getCityName() : "";
-                        setText(title + (city.isBlank() ? "" : " • " + city));
-
-                        setOnMouseClicked(evt -> {
-                            if (!isEmpty()) {
-                                onTourSelected(item);
-                            }
-                        });
-                    }
-                };
+            protected void updateItem(TourBean item, boolean empty) {
+                super.updateItem(item, empty);
+                handleCellUpdate(this, item, empty);
             }
         });
+    }
+
+    // *** MODIFICA QUI: Nuovo metodo helper per gestire la logica della cella ***
+    // Questo riduce drasticamente la "Cognitive Complexity" perché non è più annidato.
+    private void handleCellUpdate(ListCell<TourBean> cell, TourBean item, boolean empty) {
+        if (empty || item == null) {
+            cell.setText(null);
+            cell.setOnMouseClicked(null);
+            return;
+        }
+
+        cell.setText(formatCellText(item));
+
+        // Assegno l'evento click
+        cell.setOnMouseClicked(evt -> {
+            if (!cell.isEmpty()) {
+                onTourSelected(item);
+            }
+        });
+    }
+
+    // *** MODIFICA QUI: Estratta anche la logica di formattazione del testo ***
+    private String formatCellText(TourBean item) {
+        String title = (item.getTourName() != null && !item.getTourName().isBlank())
+                ? item.getTourName()
+                : "Tour";
+
+        String city = item.getCityName() != null ? item.getCityName() : "";
+        return title + (city.isBlank() ? "" : " • " + city);
     }
 
     private void onTourSelected(TourBean selected) {
@@ -86,10 +94,8 @@ public class TourListController {
                 return;
             }
 
-            var tourModel = session.getLastTourList().stream()
-                    .filter(t -> t.getTourID() != null && t.getTourID().equals(selected.getTourID()))
-                    .findFirst()
-                    .orElseThrow(() -> new TourNotFoundException("Tour non trovato."));
+            // *** MODIFICA QUI: Ho estratto la ricerca in un metodo separato per pulire onTourSelected ***
+            Tour tourModel = findTourInSession(session, selected.getTourID());
 
             session.setActualTour(tourModel);
             NavigatorBase.goTo("/fxml/pages/page6_details.fxml");
@@ -101,6 +107,14 @@ public class TourListController {
             logger.log(Level.SEVERE, e.getMessage(), e);
             showErrorDialog("Errore durante la selezione del tour.");
         }
+    }
+
+    // *** MODIFICA QUI: Helper per la ricerca stream, riduce la complessità del metodo chiamante ***
+    private Tour findTourInSession(Session session, String tourId) throws TourNotFoundException {
+        return session.getLastTourList().stream()
+                .filter(t -> t.getTourID() != null && t.getTourID().equals(tourId))
+                .findFirst()
+                .orElseThrow(() -> new TourNotFoundException("Tour non trovato."));
     }
 
     private void showInfoDialog() {

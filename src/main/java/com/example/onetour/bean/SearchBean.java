@@ -12,7 +12,9 @@ public class SearchBean implements Serializable {
     private LocalDate departureDate;
     private LocalDate returnDate;
 
-    public SearchBean() {}
+    public SearchBean() {
+        //Costruttore vuoto intenzionale per il Bean
+    }
 
     public String getSessionID() {
         return sessionID;

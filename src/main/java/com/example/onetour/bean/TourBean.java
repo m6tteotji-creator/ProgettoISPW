@@ -25,7 +25,9 @@ public class TourBean implements Serializable {
     private String guideName;
     private byte[] photo;
 
-    public TourBean() {}
+    public TourBean() {
+        //Costruttore vuoto intenzionale per il Bean
+    }
 
     public static TourBean fromModel(Tour tour) {
         TourBean b = new TourBean();

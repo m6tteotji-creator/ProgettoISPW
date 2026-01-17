@@ -37,20 +37,16 @@ public class MyBookingsController {
     private void loadMyBookings() {
         try {
             Session session = SessionManagerSingleton.getInstance().getCurrentSession();
-            if (session == null || session.getUser() == null || session.getSessionID() == null || session.getSessionID().isBlank()) {
+
+            // *** MODIFICA QUI: Estratta la condizione complessa in un metodo helper ***
+            if (isSessionInvalid(session)) {
                 showErrorDialog("Sessione non valida. Effettua di nuovo il login.");
                 NavigatorBase.goTo("/fxml/pages/page2_login.fxml");
                 return;
             }
 
-            List<BookingBean> bookings = bookTourController.getMyBookings(session.getSessionID());
-            bookingsListView.setItems(FXCollections.observableArrayList(bookings));
-
-            if (bookings.isEmpty()) {
-                hintLabel.setText("No bookings found.");
-            } else {
-                hintLabel.setText("");
-            }
+            // La logica principale è ora pulita
+            fetchAndDisplayBookings(session.getSessionID());
 
         } catch (TicketNotFoundException e) {
             logger.log(Level.INFO, e.getMessage());
@@ -67,41 +63,67 @@ public class MyBookingsController {
         }
     }
 
+    // *** MODIFICA QUI: Helper per validare la sessione ***
+    private boolean isSessionInvalid(Session session) {
+        return session == null || session.getUser() == null || session.getSessionID() == null || session.getSessionID().isBlank();
+    }
+
+    // *** MODIFICA QUI: Helper per recuperare e mostrare i dati ***
+    private void fetchAndDisplayBookings(String sessionId) throws Exception {
+        List<BookingBean> bookings = bookTourController.getMyBookings(sessionId);
+        bookingsListView.setItems(FXCollections.observableArrayList(bookings));
+
+        if (bookings.isEmpty()) {
+            hintLabel.setText("No bookings found.");
+        } else {
+            hintLabel.setText("");
+        }
+    }
+
+    // *** MODIFICA QUI: Rimosso l'annidamento profondo nella creazione della cella ***
     private void setupCellRendering() {
         bookingsListView.setCellFactory(list -> new ListCell<>() {
             @Override
             protected void updateItem(BookingBean item, boolean empty) {
                 super.updateItem(item, empty);
-
-                if (empty || item == null) {
-                    setText(null);
-                    return;
-                }
-
-                String tour = safe(item.getTourName());
-                String guide = safe(item.getGuideName());
-
-                LocalDate bookingDate = item.getBookingDate();
-                String dateStr = (bookingDate == null) ? "" : bookingDate.toString();
-
-                String stateStr = formatState(item.getState());
-
-                String line1 = tour.isBlank() ? "Tour" : tour;
-                if (!guide.isBlank()) {
-                    line1 += " • " + guide;
-                }
-
-                String line2 = "";
-                if (!dateStr.isBlank()) {
-                    line2 += dateStr;
-                }
-                if (!stateStr.isBlank()) {
-                    line2 += (line2.isBlank() ? "" : " • ") + stateStr;
-                }
-
-                setText(line1 + (line2.isBlank() ? "" : "\n" + line2));
+                configureCell(this, item, empty);
             }
         });
+    }
+
+    // *** MODIFICA QUI: Nuovo metodo helper che configura la cella ***
+    private void configureCell(ListCell<BookingBean> cell, BookingBean item, boolean empty) {
+        if (empty || item == null) {
+            cell.setText(null);
+            return;
+        }
+        // Delego la costruzione della stringa complessa a un altro metodo
+        cell.setText(buildBookingText(item));
+    }
+
+    // *** MODIFICA QUI: Nuovo metodo helper per costruire il testo (Line1 + Line2) ***
+    // Questo rende la logica lineare e facile da leggere per SonarCloud
+    private String buildBookingText(BookingBean item) {
+        String tour = safe(item.getTourName());
+        String guide = safe(item.getGuideName());
+        LocalDate bookingDate = item.getBookingDate();
+        String dateStr = (bookingDate == null) ? "" : bookingDate.toString();
+        String stateStr = formatState(item.getState());
+
+        String line1 = tour.isBlank() ? "Tour" : tour;
+        if (!guide.isBlank()) {
+            line1 += " • " + guide;
+        }
+
+        String line2 = "";
+        if (!dateStr.isBlank()) {
+            line2 += dateStr;
+        }
+        if (!stateStr.isBlank()) {
+            line2 += (line2.isBlank() ? "" : " • ") + stateStr;
+        }
+
+        return line1 + (line2.isBlank() ? "" : "\n" + line2);
     }
 
     private String formatState(TicketState state) {

@@ -10,7 +10,9 @@ public class LoginBean implements Serializable {
     private String password;
     private String sessionID;
 
-    public LoginBean() {}
+    public LoginBean() {
+        //Costruttore vuoto intenzionale per il Bean
+    }
 
     public String getEmail() {
         return email;
