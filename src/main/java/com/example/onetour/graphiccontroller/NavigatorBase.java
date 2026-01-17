@@ -1,4 +1,4 @@
-package com.example.onetour.graphicController;
+package com.example.onetour.graphiccontroller;
 
 public final class NavigatorBase {
 

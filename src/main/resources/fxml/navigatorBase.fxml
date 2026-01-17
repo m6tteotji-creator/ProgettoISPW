@@ -11,7 +11,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.example.onetour.graphicController.NavigatorController">
+            fx:controller="com.example.onetour.graphiccontroller.NavigatorController">
 
     <top>
         <HBox spacing="10" prefHeight="50" style="-fx-padding: 10;">

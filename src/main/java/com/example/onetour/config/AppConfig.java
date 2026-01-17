@@ -3,8 +3,12 @@ package com.example.onetour.config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AppConfig {
+
+    private static final Logger logger = Logger.getLogger(AppConfig.class.getName());
 
     private final Properties props = new Properties();
 
@@ -13,10 +17,10 @@ public class AppConfig {
             if (is != null) {
                 props.load(is);
             } else {
-                System.out.println("CONFIG NOT FOUND");
+                logger.log(Level.WARNING, "CONFIG NOT FOUND");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error loading configuration", e);
         }
     }
 

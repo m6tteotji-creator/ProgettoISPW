@@ -1,13 +1,13 @@
-package com.example.onetour.graphicController;
+package com.example.onetour.graphiccontroller;
 
-import com.example.onetour.applicationController.LoginController;
+import com.example.onetour.applicationcontroller.LoginController;
 import com.example.onetour.bean.LoginBean;
 import com.example.onetour.enumeration.RoleEnum;
 import com.example.onetour.exception.InvalidFormatException;
 import com.example.onetour.exception.UserNotFoundException;
 import com.example.onetour.model.Session;
 import com.example.onetour.model.UserAccount;
-import com.example.onetour.sessionManagement.SessionManagerSingleton;
+import com.example.onetour.sessionmanagement.SessionManagerSingleton;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;

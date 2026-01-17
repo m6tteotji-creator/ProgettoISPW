@@ -10,7 +10,7 @@
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.onetour.graphicController.SearchTourController"
+      fx:controller="com.example.onetour.graphiccontroller.SearchTourController"
       spacing="12" style="-fx-padding: 20;">
 
     <Label text="Search your tour" style="-fx-font-size: 18; -fx-font-weight: bold;"/>

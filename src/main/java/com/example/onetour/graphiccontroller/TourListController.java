@@ -1,10 +1,10 @@
-package com.example.onetour.graphicController;
+package com.example.onetour.graphiccontroller;
 
 import com.example.onetour.bean.TourBean;
 import com.example.onetour.exception.TourNotFoundException;
 import com.example.onetour.model.Session;
 import com.example.onetour.model.Tour;
-import com.example.onetour.sessionManagement.SessionManagerSingleton;
+import com.example.onetour.sessionmanagement.SessionManagerSingleton;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;

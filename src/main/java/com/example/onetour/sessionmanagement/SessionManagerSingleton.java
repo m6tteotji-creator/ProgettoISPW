@@ -1,4 +1,4 @@
-package com.example.onetour.sessionManagement;
+package com.example.onetour.sessionmanagement;
 
 import com.example.onetour.model.Session;
 import com.example.onetour.model.UserAccount;

@@ -1,4 +1,4 @@
-package com.example.onetour.applicationController;
+package com.example.onetour.applicationcontroller;
 
 import com.example.onetour.bean.BookingBean;
 import com.example.onetour.bean.EmailBean;
@@ -17,7 +17,7 @@ import com.example.onetour.exception.InvalidFormatException;
 import com.example.onetour.model.Ticket;
 import com.example.onetour.model.Tour;
 import com.example.onetour.model.UserAccount;
-import com.example.onetour.sessionManagement.SessionManagerSingleton;
+import com.example.onetour.sessionmanagement.SessionManagerSingleton;
 
 import java.util.ArrayList;
 import java.util.List;

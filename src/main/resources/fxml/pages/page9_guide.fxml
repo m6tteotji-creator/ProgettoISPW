@@ -7,7 +7,7 @@
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.onetour.graphicController.GuideConfirmController"
+      fx:controller="com.example.onetour.graphiccontroller.GuideConfirmController"
       spacing="12" style="-fx-padding: 20;">
 
     <Label text="New requests (Pending)" style="-fx-font-size: 18; -fx-font-weight: bold;"/>

@@ -44,12 +44,13 @@ public class TicketDAOCSV extends TicketDAO {
 
             if (!fd.exists()) {
                 boolean created = fd.createNewFile();
-                logger.log(Level.INFO, created
+                // Uso lambda per il logger (best practice)
+                logger.log(Level.INFO, () -> created
                         ? "CSV created: " + fd.getAbsolutePath()
                         : "CSV already exists: " + fd.getAbsolutePath());
             }
         } catch (IOException e) {
-            throw new RuntimeException("Cannot initialize TicketDAOCSV: " + CSV_PATH, e);
+            throw new CSVPersistenceException("Cannot initialize TicketDAOCSV: " + CSV_PATH, e);
         }
     }
 
@@ -63,7 +64,7 @@ public class TicketDAOCSV extends TicketDAO {
             }
             append(ticket);
         } catch (IOException | CsvValidationException e) {
-            throw new RuntimeException("CSV persistence error (create)", e);
+            throw new CSVPersistenceException("CSV persistence error (create)", e);
         }
     }
 
@@ -80,11 +81,10 @@ public class TicketDAOCSV extends TicketDAO {
             }
             return res;
         } catch (IOException | CsvValidationException e) {
-            throw new RuntimeException("CSV persistence error (retrieveByUser)", e);
+            throw new CSVPersistenceException("CSV persistence error (retrieveByUser)", e);
         }
     }
 
-    // *** MODIFICA QUI: Ho semplificato drasticamente questo metodo usando isRowMatchingGuide ***
     @Override
     public synchronized List<Ticket> retrievePendingByGuide(String guideEmail) throws TicketNotFoundException {
         if (guideEmail == null || guideEmail.isBlank()) {
@@ -95,7 +95,6 @@ public class TicketDAOCSV extends TicketDAO {
             List<Ticket> res = readFiltered(row -> {
                 if (row.length < 5) return false;
 
-                // Controllo solo lo stato qui, il resto lo delego al metodo helper
                 String st = row[IDX_STATE];
                 if (!TicketState.PENDING.name().equals(st)) return false;
 
@@ -108,11 +107,10 @@ public class TicketDAOCSV extends TicketDAO {
             return res;
 
         } catch (IOException | CsvValidationException e) {
-            throw new RuntimeException("CSV persistence error (retrievePendingByGuide)", e);
+            throw new CSVPersistenceException("CSV persistence error (retrievePendingByGuide)", e);
         }
     }
 
-    // *** MODIFICA QUI: Anche questo metodo ora usa l'helper per ridurre la complessità ***
     @Override
     public synchronized List<Ticket> retrieveByGuide(String guideEmail) throws TicketNotFoundException {
         if (guideEmail == null || guideEmail.isBlank()) {
@@ -131,7 +129,7 @@ public class TicketDAOCSV extends TicketDAO {
             return res;
 
         } catch (IOException | CsvValidationException e) {
-            throw new RuntimeException("CSV persistence error (retrieveByGuide)", e);
+            throw new CSVPersistenceException("CSV persistence error (retrieveByGuide)", e);
         }
     }
 
@@ -162,7 +160,7 @@ public class TicketDAOCSV extends TicketDAO {
 
             rewriteAll(rows);
         } catch (IOException | CsvValidationException e) {
-            throw new RuntimeException("CSV persistence error (modifyState)", e);
+            throw new CSVPersistenceException("CSV persistence error (modifyState)", e);
         }
     }
 
@@ -175,7 +173,7 @@ public class TicketDAOCSV extends TicketDAO {
             if (tour.getTouristGuide() == null || tour.getTouristGuide().getEmail() == null) return false;
             return tour.getTouristGuide().getEmail().equalsIgnoreCase(guideEmail);
         } catch (SQLException | TourNotFoundException e) {
-            logger.log(Level.WARNING, "Skipping row: cannot rebuild Tour for tour_id=" + tourId, e);
+            logger.log(Level.WARNING, e, () -> "Skipping row: cannot rebuild Tour for tour_id=" + tourId);
             return false;
         }
     }
@@ -259,7 +257,7 @@ public class TicketDAOCSV extends TicketDAO {
         try {
             tour = buildTourDAO().retrieveTourFromId(tourID);
         } catch (SQLException | TourNotFoundException e) {
-            throw new RuntimeException("Cannot rebuild Tour from id in CSV: " + tourID, e);
+            throw new CSVPersistenceException("Cannot rebuild Tour from id in CSV: " + tourID, e);
         }
 
         Ticket t = new Ticket(id, date, st, userEmail);
@@ -284,5 +282,11 @@ public class TicketDAOCSV extends TicketDAO {
     @FunctionalInterface
     private interface RowPredicate {
         boolean test(String[] row);
+    }
+
+    private static class CSVPersistenceException extends RuntimeException {
+        public CSVPersistenceException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 }

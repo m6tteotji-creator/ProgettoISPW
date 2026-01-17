@@ -6,7 +6,7 @@ module com.example.onetour {
     requires java.sql;
     requires com.opencsv;
 
-    opens com.example.onetour.graphicController to javafx.fxml;
+    opens com.example.onetour.graphiccontroller to javafx.fxml;
 
     exports com.example.onetour;
 }

@@ -13,26 +13,38 @@ public class TicketDAOFactorySingleton {
     public static TicketDAOFactorySingleton getInstance() {
         return Helper.INSTANCE;
     }
+    public TicketDAO createTicketDAO() {
+        try {
+            AppConfig cfg = AppConfig.getInstance();
 
-    public TicketDAO createTicketDAO() throws Exception {
-        AppConfig cfg = AppConfig.getInstance();
+            // app.mode: DEMO | JDBC
+            String mode = cfg.get("app.mode", "DEMO");
 
-        // app.mode: DEMO | JDBC
-        String mode = cfg.get("app.mode", "DEMO");
+            // DEMO
+            if ("DEMO".equalsIgnoreCase(mode)) {
+                return new TicketDAOMemory();
+            }
 
-        // DEMO
-        if ("DEMO".equalsIgnoreCase(mode)) {
-            return new TicketDAOMemory();
+            // non-DEMO
+            String persistence = cfg.get("ticket.persistence", "MYSQL");
+
+            return switch (persistence.toUpperCase()) {
+                case "MYSQL" -> new TicketDAOJDBC();
+                case "CSV" -> new TicketDAOCSV();
+                case "MEMORY" -> new TicketDAOMemory();
+                default -> throw new IllegalArgumentException("Unknown ticket.persistence: " + persistence);
+            };
+        } catch (Exception e) {
+            if (e instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            throw new FactoryConfigurationException("Unable to create TicketDAO", e);
         }
+    }
 
-        // non-DEMO
-        String persistence = cfg.get("ticket.persistence", "MYSQL");
-
-        return switch (persistence.toUpperCase()) {
-            case "MYSQL" -> new TicketDAOJDBC();
-            case "CSV" -> new TicketDAOCSV();
-            case "MEMORY" -> new TicketDAOMemory();
-            default -> throw new IllegalArgumentException("Unknown ticket.persistence: " + persistence);
-        };
+    public static class FactoryConfigurationException extends RuntimeException {
+        public FactoryConfigurationException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 }

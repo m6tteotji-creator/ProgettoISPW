@@ -1,12 +1,12 @@
-package com.example.onetour.graphicController;
+package com.example.onetour.graphiccontroller;
 
-import com.example.onetour.applicationController.BookTourController;
+import com.example.onetour.applicationcontroller.BookTourController;
 import com.example.onetour.bean.BookingBean;
 import com.example.onetour.enumeration.TicketState;
 import com.example.onetour.exception.InvalidFormatException;
 import com.example.onetour.exception.TicketNotFoundException;
 import com.example.onetour.model.Session;
-import com.example.onetour.sessionManagement.SessionManagerSingleton;
+import com.example.onetour.sessionmanagement.SessionManagerSingleton;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;

@@ -28,15 +28,6 @@ public class Tour {
         this.price = price;
     }
 
-    public Tour(String tourID, String nameTour, String cityName,
-                LocalDate departureDate, LocalDate returnDate,
-                double price, List<String> attractions,
-                TouristGuide touristGuide, byte[] photo) {
-        this(tourID, nameTour, cityName, departureDate, returnDate, price);
-        this.attractions = attractions;
-        this.touristGuide = touristGuide;
-        this.photo = photo;
-    }
 
     public String getTourID() {
         return tourID;

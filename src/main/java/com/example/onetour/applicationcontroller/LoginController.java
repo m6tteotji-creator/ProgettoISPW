@@ -1,4 +1,4 @@
-package com.example.onetour.applicationController;
+package com.example.onetour.applicationcontroller;
 
 import com.example.onetour.bean.LoginBean;
 import com.example.onetour.config.AppConfig;
@@ -7,7 +7,7 @@ import com.example.onetour.enumeration.RoleEnum;
 import com.example.onetour.exception.InvalidFormatException;
 import com.example.onetour.exception.UserNotFoundException;
 import com.example.onetour.model.UserAccount;
-import com.example.onetour.sessionManagement.SessionManagerSingleton;
+import com.example.onetour.sessionmanagement.SessionManagerSingleton;
 
 import java.sql.SQLException;
 import java.util.UUID;
@@ -41,6 +41,7 @@ public class LoginController {
             loginBean.getClass().getMethod("setRole", String.class)
                     .invoke(loginBean, user.getRole().getRoleName());
         } catch (Exception ignored) {
+            // Ignoriamo l'eccezione
         }
 
         return loginBean;

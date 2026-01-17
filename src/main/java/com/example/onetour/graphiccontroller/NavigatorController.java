@@ -1,8 +1,8 @@
-package com.example.onetour.graphicController;
+package com.example.onetour.graphiccontroller;
 
 import com.example.onetour.model.Session;
 import com.example.onetour.model.UserAccount;
-import com.example.onetour.sessionManagement.SessionManagerSingleton;
+import com.example.onetour.sessionmanagement.SessionManagerSingleton;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -55,9 +55,9 @@ public class NavigatorController {
             refreshHeader();
 
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Errore nel caricamento FXML: " + fxmlPath, e);
+            logger.log(Level.SEVERE, e, () -> "Errore nel caricamento FXML: " + fxmlPath);
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Errore inatteso durante la navigazione verso: " + fxmlPath, e);
+            logger.log(Level.SEVERE, e, () -> "Errore inatteso durante la navigazione verso: " + fxmlPath);
         }
     }
 

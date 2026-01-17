@@ -37,7 +37,7 @@ public class TicketDAOJDBC extends TicketDAO {
 
             int rows = ps.executeUpdate();
             if (rows != 1) {
-                throw new RuntimeException("Insert failed for ticket_id=" + ticket.getTicketID());
+                throw new DAOException("Insert failed for ticket_id=" + ticket.getTicketID());
             }
 
         } catch (SQLException e) {
@@ -47,7 +47,7 @@ public class TicketDAOJDBC extends TicketDAO {
                         e
                 );
             }
-            throw new RuntimeException("DB error while creating ticket", e);
+            throw new DAOException("DB error while creating ticket", e);
         }
     }
 
@@ -71,7 +71,8 @@ public class TicketDAOJDBC extends TicketDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("DB error while retrieving tickets by user", e);
+            // FIX: Uso eccezione specifica
+            throw new DAOException("DB error while retrieving tickets by user", e);
         }
 
         if (out.isEmpty()) {
@@ -101,7 +102,7 @@ public class TicketDAOJDBC extends TicketDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("DB error while retrieving pending tickets by guide", e);
+            throw new DAOException("DB error while retrieving pending tickets by guide", e);
         }
 
         if (out.isEmpty()) {
@@ -110,7 +111,6 @@ public class TicketDAOJDBC extends TicketDAO {
         return out;
     }
 
-    // ✅ NUOVO: tutte le richieste della guida (pending + history)
     @Override
     public List<Ticket> retrieveByGuide(String guideEmail) throws TicketNotFoundException {
         if (guideEmail == null || guideEmail.isBlank()) {
@@ -131,7 +131,8 @@ public class TicketDAOJDBC extends TicketDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("DB error while retrieving tickets by guide", e);
+            // FIX: Uso eccezione specifica
+            throw new DAOException("DB error while retrieving tickets by guide", e);
         }
 
         if (out.isEmpty()) {
@@ -161,7 +162,7 @@ public class TicketDAOJDBC extends TicketDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("DB error while updating ticket state", e);
+            throw new DAOException("DB error while updating ticket state", e);
         }
     }
 
@@ -174,12 +175,10 @@ public class TicketDAOJDBC extends TicketDAO {
 
         Ticket t = new Ticket(ticketID, bookingDate, state, userEmail);
 
-        // ✅ Ricostruisco Tour completo per UI (nome tour, città, guida, etc.)
         try {
             Tour fullTour = tourDAO.retrieveTourFromId(tourID);
             t.setTour(fullTour);
         } catch (TourNotFoundException e) {
-            // fallback minimal
             Tour minimal = new Tour(tourID, "", "", bookingDate, bookingDate, 0.0);
             t.setTour(minimal);
         }
@@ -195,5 +194,14 @@ public class TicketDAOJDBC extends TicketDAO {
         if (ticket.getTour().getTourID() == null || ticket.getTour().getTourID().isBlank()) throw new IllegalArgumentException("tour_id missing");
         if (ticket.getBookingDate() == null) throw new IllegalArgumentException("booking_date missing");
         if (ticket.getState() == null) throw new IllegalArgumentException("state missing");
+    }
+
+    public static class DAOException extends RuntimeException {
+        public DAOException(String message) {
+            super(message);
+        }
+        public DAOException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 }
