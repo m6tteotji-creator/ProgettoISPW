@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.onetour.graphicController.GuideConfirmController"
+      spacing="12" style="-fx-padding: 20;">
+
+    <Label text="New requests (Pending)" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+
+    <TableView fx:id="pendingTable" prefHeight="260">
+        <columns>
+            <TableColumn fx:id="pTourCol" text="Tour" prefWidth="260"/>
+            <TableColumn fx:id="pUserCol" text="User (email)" prefWidth="260"/>
+            <TableColumn fx:id="pDateCol" text="Booking date" prefWidth="140"/>
+            <TableColumn fx:id="pActionCol" text="Action" prefWidth="200"/>
+        </columns>
+    </TableView>
+
+    <Label text="Past requests" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+
+    <TableView fx:id="historyTable" prefHeight="260">
+        <columns>
+            <TableColumn fx:id="hTourCol" text="Tour" prefWidth="260"/>
+            <TableColumn fx:id="hUserCol" text="User (email)" prefWidth="260"/>
+            <TableColumn fx:id="hDateCol" text="Booking date" prefWidth="140"/>
+            <TableColumn fx:id="hStateCol" text="State" prefWidth="200"/>
+        </columns>
+    </TableView>
+
+</VBox>
