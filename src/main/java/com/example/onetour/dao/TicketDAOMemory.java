@@ -55,17 +55,9 @@ public class TicketDAOMemory extends TicketDAO {
         List<Ticket> out = new ArrayList<>();
 
         for (Ticket t : STORE.values()) {
-            if (t == null) continue;
-            if (t.getState() != TicketState.PENDING) continue;
-
-            Tour tour = t.getTour();
-            if (tour == null) continue;
-
-            TouristGuide g = tour.getTouristGuide();
-            if (g == null) continue;
-
-            String email = g.getEmail();
-            if (email != null && email.equalsIgnoreCase(guideEmail)) {
+            if (t != null
+                    && t.getState() == TicketState.PENDING
+                    && isMatchingGuide(t, guideEmail)) {
                 out.add(t);
             }
         }
@@ -76,25 +68,14 @@ public class TicketDAOMemory extends TicketDAO {
         return out;
     }
 
-    // ✅ NUOVO: tutte le richieste della guida (pending + vecchie)
     @Override
     public synchronized List<Ticket> retrieveByGuide(String guideEmail) throws TicketNotFoundException {
         if (guideEmail == null || guideEmail.isBlank())
             throw new IllegalArgumentException("guideEmail is null/blank");
 
         List<Ticket> out = new ArrayList<>();
-
         for (Ticket t : STORE.values()) {
-            if (t == null) continue;
-
-            Tour tour = t.getTour();
-            if (tour == null) continue;
-
-            TouristGuide g = tour.getTouristGuide();
-            if (g == null) continue;
-
-            String email = g.getEmail();
-            if (email != null && email.equalsIgnoreCase(guideEmail)) {
+            if (isMatchingGuide(t, guideEmail)) {
                 out.add(t);
             }
         }
@@ -120,5 +101,13 @@ public class TicketDAOMemory extends TicketDAO {
 
     public static synchronized void clearAll() {
         STORE.clear();
+    }
+
+    private boolean isMatchingGuide(Ticket t, String guideEmail) {
+        if (t == null) return false;
+        Tour tour = t.getTour();
+        if (tour == null) return false;
+        TouristGuide g = tour.getTouristGuide();
+        return g != null && g.getEmail() != null && g.getEmail().equalsIgnoreCase(guideEmail);
     }
 }

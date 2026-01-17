@@ -29,52 +29,32 @@ public class TourDAOMemory extends TourDAO {
 
         // --- TOURS ---
         Tour t1 = new Tour(
-                "T001",
-                "Colosseo Experience",
-                "Roma",
-                LocalDate.of(2026, 2, 10),
-                LocalDate.of(2026, 2, 12),
-                25.0,
-                List.of("Colosseo", "Foro Romano", "Palatino"),
-                g1,
-                null
+                "T001", "Colosseo Experience", "Roma",
+                LocalDate.of(2026, 2, 10), LocalDate.of(2026, 2, 12), 25.0
         );
+        t1.setAttractions(List.of("Colosseo", "Foro Romano", "Palatino"));
+        t1.setTouristGuide(g1);
 
         Tour t2 = new Tour(
-                "T002",
-                "Vatican Museums Tour",
-                "Roma",
-                LocalDate.of(2026, 2, 15),
-                LocalDate.of(2026, 2, 16),
-                30.0,
-                List.of("Musei Vaticani", "Cappella Sistina", "Basilica San Pietro"),
-                g1,
-                null
+                "T002", "Vatican Museums Tour", "Roma",
+                LocalDate.of(2026, 2, 15), LocalDate.of(2026, 2, 16), 30.0
         );
+        t2.setAttractions(List.of("Musei Vaticani", "Cappella Sistina", "Basilica San Pietro"));
+        t2.setTouristGuide(g1);
 
         Tour t3 = new Tour(
-                "T003",
-                "Duomo & Centro Storico",
-                "Milano",
-                LocalDate.of(2026, 3, 1),
-                LocalDate.of(2026, 3, 2),
-                20.0,
-                List.of("Duomo", "Galleria Vittorio Emanuele", "Castello Sforzesco"),
-                g2,
-                null
+                "T003", "Duomo & Centro Storico", "Milano",
+                LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 2), 20.0
         );
+        t3.setAttractions(List.of("Duomo", "Galleria Vittorio Emanuele", "Castello Sforzesco"));
+        t3.setTouristGuide(g2);
 
         Tour t4 = new Tour(
-                "T004",
-                "Canal Cruise & Night Walk",
-                "Venezia",
-                LocalDate.of(2026, 3, 10),
-                LocalDate.of(2026, 3, 12),
-                35.0,
-                List.of("Canal Grande", "Rialto", "San Marco"),
-                g2,
-                null
+                "T004", "Canal Cruise & Night Walk", "Venezia",
+                LocalDate.of(2026, 3, 10), LocalDate.of(2026, 3, 12), 35.0
         );
+        t4.setAttractions(List.of("Canal Grande", "Rialto", "San Marco"));
+        t4.setTouristGuide(g2);
 
         SEED.add(t1);
         SEED.add(t2);
