@@ -1,4 +1,4 @@
-package com.example.onetour.graphiccontrollerCLI;
+package com.example.onetour.graphiccontrollercli;
 
 import com.example.onetour.bean.TourBean;
 
@@ -17,11 +17,11 @@ public class TourListCLIController extends NavigatorCLIController {
 
     public void start() {
         while (true) {
-            System.out.println();
-            System.out.println("=== RISULTATI TOUR ===");
+            CLIPrinter.println();
+            CLIPrinter.println("=== RISULTATI TOUR ===");
 
             if (tours == null || tours.isEmpty()) {
-                System.out.println("Nessun risultato.");
+                CLIPrinter.println("Nessun risultato.");
                 return;
             }
 
@@ -36,7 +36,7 @@ public class TourListCLIController extends NavigatorCLIController {
                 String price = formatPrice(t.getPrice());
                 String guide = safe(t.getGuideName());
 
-                System.out.printf(
+                CLIPrinter.printf(
                         "%d) %s | %s | %s -> %s | %s | Guida: %s%n",
                         i + 1,
                         tourName,
@@ -48,10 +48,12 @@ public class TourListCLIController extends NavigatorCLIController {
                 );
             }
 
-            System.out.println("0) Indietro");
+            CLIPrinter.println("0) Indietro");
             int choice = readInt("Seleziona un tour: ", 0, max);
 
-            if (choice == 0) return;
+            if (choice == 0) {
+                return;
+            }
 
             TourBean selected = tours.get(choice - 1);
             new TourDetailsCLIController(sessionId, selected).start();
@@ -67,7 +69,9 @@ public class TourListCLIController extends NavigatorCLIController {
     }
 
     private String formatPrice(double p) {
-        if (p <= 0.0) return "-";
+        if (p <= 0.0) {
+            return "-";
+        }
         return String.format("%.2f EUR", p);
     }
 }

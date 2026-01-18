@@ -1,4 +1,4 @@
-package com.example.onetour.graphiccontrollerCLI;
+package com.example.onetour.graphiccontrollercli;
 
 import com.example.onetour.applicationcontroller.LoginController;
 import com.example.onetour.bean.LoginBean;
@@ -11,16 +11,16 @@ public class LoginCLIController extends NavigatorCLIController {
     private final LoginController loginController = new LoginController();
 
     public void start() {
-        System.out.println("=== ONE TOUR ===");
+        CLIPrinter.println("=== ONE TOUR ===");
 
         while (true) {
-            System.out.println();
-            System.out.println("1) Login");
-            System.out.println("2) Esci");
+            CLIPrinter.println();
+            CLIPrinter.println("1) Login");
+            CLIPrinter.println("2) Esci");
             int choice = readInt("Seleziona: ", 1, 2);
 
             if (choice == 2) {
-                System.out.println("Chiusura...");
+                CLIPrinter.println("Chiusura...");
                 return;
             }
 
@@ -42,13 +42,13 @@ public class LoginCLIController extends NavigatorCLIController {
             String sessionId = logged.getSessionID();
             Session s = SessionManagerSingleton.getInstance().getSession(sessionId);
             if (s == null || s.getUser() == null) {
-                System.out.println("Errore: sessione non valida.");
+                CLIPrinter.println("Errore: sessione non valida.");
                 return;
             }
 
             RoleEnum role = s.getUser().getRole();
-            System.out.println("Login OK. Ruolo: " + role.getRoleName());
-            System.out.println("SessionID: " + sessionId);
+            CLIPrinter.println("Login OK. Ruolo: " + role.getRoleName());
+            CLIPrinter.println("SessionID: " + sessionId);
 
             if (role == RoleEnum.TOURISTGUIDE) {
                 new GuideRequestsCLIController(sessionId).start();
@@ -57,7 +57,7 @@ public class LoginCLIController extends NavigatorCLIController {
             }
 
         } catch (Exception e) {
-            System.out.println("Login fallito: " + e.getMessage());
+            CLIPrinter.println("Login fallito: " + e.getMessage());
         }
     }
 }

@@ -1,10 +1,11 @@
-package com.example.onetour.graphiccontrollerCLI;
+package com.example.onetour.graphiccontrollercli;
 
 import com.example.onetour.applicationcontroller.BookTourController;
 import com.example.onetour.bean.BookingBean;
 import com.example.onetour.bean.EmailBean;
 import com.example.onetour.enumeration.TicketState;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class GuideRequestsCLIController extends NavigatorCLIController {
@@ -18,16 +19,15 @@ public class GuideRequestsCLIController extends NavigatorCLIController {
 
     public void start() {
         while (true) {
-            System.out.println();
-            System.out.println("=== AREA GUIDA ===");
-            System.out.println("1) Visualizza richieste pending");
-            System.out.println("2) Logout");
+            CLIPrinter.println();
+            CLIPrinter.println("=== AREA GUIDA (CLI) ===");
+            CLIPrinter.println("1) Visualizza richieste pending");
+            CLIPrinter.println("2) Logout");
             int choice = readInt("Seleziona: ", 1, 2);
 
             if (choice == 2) {
                 return;
             }
-
             showPendingAndDecide();
         }
     }
@@ -37,18 +37,18 @@ public class GuideRequestsCLIController extends NavigatorCLIController {
             List<BookingBean> pending = bookTourController.getPendingRequests(sessionId);
 
             if (pending == null || pending.isEmpty()) {
-                System.out.println("Nessuna richiesta pending.");
+                CLIPrinter.println("Nessuna richiesta pending.");
                 return;
             }
 
-            System.out.println();
-            System.out.println("Richieste pending:");
+            CLIPrinter.println();
+            CLIPrinter.println("Richieste pending:");
             int max = pending.size();
 
             for (int i = 0; i < max; i++) {
                 BookingBean b = pending.get(i);
 
-                System.out.printf(
+                CLIPrinter.printf(
                         "%d) %s | Tour: %s | Data: %s | Stato: %s%n",
                         i + 1,
                         safe(b.getGuideName()),
@@ -56,21 +56,26 @@ public class GuideRequestsCLIController extends NavigatorCLIController {
                         safeDate(b.getBookingDate()),
                         safeState(b.getState())
                 );
-                System.out.println("    TicketID: " + safe(b.getTicketID()));
+
+                CLIPrinter.println("   TicketID: " + safe(b.getTicketID()));
             }
 
-            System.out.println("0) Indietro");
+            CLIPrinter.println("0) Indietro");
             int idx = readInt("Seleziona una richiesta: ", 0, max);
-            if (idx == 0) return;
+            if (idx == 0) {
+                return;
+            }
 
             BookingBean selected = pending.get(idx - 1);
 
-            System.out.println();
-            System.out.println("1) Conferma");
-            System.out.println("2) Rifiuta");
-            System.out.println("0) Annulla");
+            CLIPrinter.println();
+            CLIPrinter.println("1) Conferma");
+            CLIPrinter.println("2) Rifiuta");
+            CLIPrinter.println("0) Annulla");
             int decision = readInt("Scelta: ", 0, 2);
-            if (decision == 0) return;
+            if (decision == 0) {
+                return;
+            }
 
             boolean accept = (decision == 1);
 
@@ -81,10 +86,10 @@ public class GuideRequestsCLIController extends NavigatorCLIController {
 
             bookTourController.guideDecision(eb);
 
-            System.out.println("Decisione salvata (" + (accept ? "CONFERMATA" : "RIFIUTATA") + ").");
+            CLIPrinter.println("Decisione salvata (" + (accept ? "CONFERMATA" : "RIFIUTATA") + ").");
 
         } catch (Exception e) {
-            System.out.println("Errore: " + e.getMessage());
+            CLIPrinter.println("Errore: " + e.getMessage());
         }
     }
 
@@ -92,7 +97,7 @@ public class GuideRequestsCLIController extends NavigatorCLIController {
         return (s == null || s.isBlank()) ? "-" : s;
     }
 
-    private String safeDate(java.time.LocalDate d) {
+    private String safeDate(LocalDate d) {
         return (d == null) ? "-" : d.toString();
     }
 

@@ -1,0 +1,24 @@
+package com.example.onetour.graphiccontrollercli;
+
+public final class CLIPrinter {
+
+    private CLIPrinter() {
+        // utility class
+    }
+
+    public static void println() {
+        System.out.println();
+    }
+
+    public static void println(String s) {
+        System.out.println(s);
+    }
+
+    public static void print(String s) {
+        System.out.print(s);
+    }
+
+    public static void printf(String format, Object... args) {
+        System.out.printf(format, args);
+    }
+}

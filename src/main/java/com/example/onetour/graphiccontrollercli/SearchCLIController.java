@@ -1,4 +1,4 @@
-package com.example.onetour.graphiccontrollerCLI;
+package com.example.onetour.graphiccontrollercli;
 
 import com.example.onetour.applicationcontroller.BookTourController;
 import com.example.onetour.bean.SearchBean;
@@ -19,11 +19,11 @@ public class SearchCLIController extends NavigatorCLIController {
 
     public void start() {
         while (true) {
-            System.out.println();
-            System.out.println("=== RICERCA TOUR ===");
-            System.out.println("1) Cerca tour");
-            System.out.println("2) Le mie prenotazioni");
-            System.out.println("3) Logout");
+            CLIPrinter.println();
+            CLIPrinter.println("=== RICERCA TOUR ===");
+            CLIPrinter.println("1) Cerca tour");
+            CLIPrinter.println("2) Le mie prenotazioni");
+            CLIPrinter.println("3) Logout");
             int choice = readInt("Seleziona: ", 1, 3);
 
             switch (choice) {
@@ -32,6 +32,7 @@ public class SearchCLIController extends NavigatorCLIController {
                 case 3 -> {
                     return;
                 }
+                default -> CLIPrinter.println("Scelta non valida.");
             }
         }
     }
@@ -52,25 +53,27 @@ public class SearchCLIController extends NavigatorCLIController {
             List<TourBean> results = bookTourController.searchTours(sb);
 
             if (results == null || results.isEmpty()) {
-                System.out.println("Nessun tour trovato.");
+                CLIPrinter.println("Nessun tour trovato.");
                 return;
             }
 
             new TourListCLIController(sessionID, results).start();
 
         } catch (Exception e) {
-            System.out.println("Errore durante la ricerca: " + e.getMessage());
+            CLIPrinter.println("Errore durante la ricerca: " + e.getMessage());
         }
     }
 
     private LocalDate readLocalDateOrNull(String prompt) {
         while (true) {
             String s = readLine(prompt);
-            if (s.isBlank()) return null;
+            if (s.isBlank()) {
+                return null;
+            }
             try {
                 return LocalDate.parse(s);
             } catch (DateTimeParseException ex) {
-                System.out.println("Formato data non valido. Usa YYYY-MM-DD oppure invio per saltare.");
+                CLIPrinter.println("Formato data non valido. Usa YYYY-MM-DD oppure invio per saltare.");
             }
         }
     }
