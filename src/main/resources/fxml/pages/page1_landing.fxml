@@ -1,8 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
 
-<StackPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
-    <Label text="Pag.1 Landing (placeholder)"/>
-</StackPane>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml/1"
+      alignment="TOP_CENTER"
+      spacing="28"
+      style="-fx-background-color: white;">
+
+    <!-- Titolo centrale -->
+    <VBox alignment="CENTER" spacing="6">
+        <padding>
+            <Insets top="40" right="0" bottom="0" left="0"/>
+        </padding>
+
+        <Label text="CHOOOSE YOUR EXPERIENCE"
+               style="-fx-font-size: 12px; -fx-letter-spacing: 1px; -fx-text-fill: #222;"/>
+
+        <Label text="TOP ATTRACTION DESTINATIONS"
+               style="-fx-font-size: 24px; -fx-font-weight: 600; -fx-text-fill: #222;"/>
+    </VBox>
+
+    <!-- Cards città -->
+    <HBox alignment="CENTER" spacing="60">
+        <padding>
+            <Insets top="10" right="30" bottom="0" left="30"/>
+        </padding>
+
+        <!-- BARCELLONA -->
+        <VBox alignment="CENTER" spacing="10">
+            <Label text="BARCELLONA"
+                   style="-fx-font-size: 14px; -fx-font-weight: 500; -fx-text-fill: #222;"/>
+            <ImageView fitWidth="230" fitHeight="320" preserveRatio="false">
+                <image><Image url="@../images/barcellona.png"/></image>
+                <clip>
+                    <Rectangle width="230" height="320" arcWidth="40" arcHeight="40"/>
+                </clip>
+            </ImageView>
+        </VBox>
+
+        <!-- VIENNA -->
+        <VBox alignment="CENTER" spacing="10">
+            <Label text="VIENNA"
+                   style="-fx-font-size: 14px; -fx-font-weight: 500; -fx-text-fill: #222;"/>
+            <ImageView fitWidth="230" fitHeight="320" preserveRatio="false">
+                <image><Image url="@../images/vienna.png"/></image>
+                <clip>
+                    <Rectangle width="230" height="320" arcWidth="40" arcHeight="40"/>
+                </clip>
+            </ImageView>
+        </VBox>
+
+        <!-- ROMA -->
+        <VBox alignment="CENTER" spacing="10">
+            <Label text="ROMA"
+                   style="-fx-font-size: 14px; -fx-font-weight: 500; -fx-text-fill: #222;"/>
+            <ImageView fitWidth="230" fitHeight="320" preserveRatio="false">
+                <image><Image url="@../images/roma.png"/></image>
+                <clip>
+                    <Rectangle width="230" height="320" arcWidth="40" arcHeight="40"/>
+                </clip>
+            </ImageView>
+        </VBox>
+
+        <!-- LONDRA -->
+        <VBox alignment="CENTER" spacing="10">
+            <Label text="LONDRA"
+                   style="-fx-font-size: 14px; -fx-font-weight: 500; -fx-text-fill: #222;"/>
+            <ImageView fitWidth="230" fitHeight="320" preserveRatio="false">
+                <image><Image url="@../images/londra.png"/></image>
+                <clip>
+                    <Rectangle width="230" height="320" arcWidth="40" arcHeight="40"/>
+                </clip>
+            </ImageView>
+        </VBox>
+
+    </HBox>
+
+</VBox>

@@ -109,8 +109,6 @@ public class TourDAOJDBC extends TourDAO {
         String guideEmail = rs.getString("guide_email");
         if (guideEmail != null && !guideEmail.isBlank()) {
             TouristGuide guide = retrieveGuideByEmail(conn, guideEmail);
-
-            // fallback: almeno email (ma con questa query di solito lo trovi sempre)
             if (guide == null) {
                 guide = new TouristGuide(null, "", "", guideEmail);
             }

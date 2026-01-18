@@ -16,21 +16,35 @@ import java.util.logging.Logger;
 
 public class SearchTourController {
 
-    private final Logger logger = Logger.getLogger(SearchTourController.class.getName());
+    private static final Logger logger = Logger.getLogger(SearchTourController.class.getName());
     private final BookTourController bookTourController = new BookTourController();
 
     @FXML
-    private TextField destinationField;   // fx:id nel tuo page4_home.fxml
+    private TextField destinationField;
 
     @FXML
-    private DatePicker fromDatePicker;    // fx:id nel tuo page4_home.fxml
+    private DatePicker fromDatePicker;
 
     @FXML
-    private DatePicker toDatePicker;      // fx:id nel tuo page4_home.fxml
+    private DatePicker toDatePicker;
 
     @FXML
     public void initialize() {
         NavigatorBase.refreshHeader();
+    }
+
+    @FXML
+    private void onOpenFromCalendar() {
+        if (fromDatePicker != null) {
+            fromDatePicker.show();
+        }
+    }
+
+    @FXML
+    private void onOpenToCalendar() {
+        if (toDatePicker != null) {
+            toDatePicker.show();
+        }
     }
 
     @FXML
@@ -43,9 +57,9 @@ public class SearchTourController {
                 return;
             }
 
-            String destination = destinationField != null ? destinationField.getText() : null;
-            LocalDate from = fromDatePicker != null ? fromDatePicker.getValue() : null;
-            LocalDate to = toDatePicker != null ? toDatePicker.getValue() : null;
+            String destination = (destinationField != null) ? destinationField.getText() : null;
+            LocalDate from = (fromDatePicker != null) ? fromDatePicker.getValue() : null;
+            LocalDate to = (toDatePicker != null) ? toDatePicker.getValue() : null;
 
             SearchBean sb = new SearchBean();
             sb.setSessionID(session.getSessionID());
@@ -55,14 +69,13 @@ public class SearchTourController {
             sb.checkFields();
 
             bookTourController.searchTours(sb);
-
             NavigatorBase.goTo("/fxml/pages/page5_results.fxml");
 
         } catch (InvalidFormatException e) {
             logger.log(Level.WARNING, e.getMessage());
             showErrorDialog(e.getMessage());
         } catch (Exception e) {
-            logger.log(Level.SEVERE, e.getMessage(), e);
+            logger.log(Level.SEVERE, "Errore durante la ricerca.", e);
             showErrorDialog("Errore durante la ricerca.");
         }
     }

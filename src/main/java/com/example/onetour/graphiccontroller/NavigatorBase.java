@@ -24,4 +24,18 @@ public final class NavigatorBase {
         }
         navigatorController.refreshHeader();
     }
+    
+    public static void hideHeader() {
+        if (navigatorController == null) {
+            throw new IllegalStateException("NavigatorController non inizializzato.");
+        }
+        navigatorController.setHeaderVisible(false);
+    }
+
+    public static void showHeader() {
+        if (navigatorController == null) {
+            throw new IllegalStateException("NavigatorController non inizializzato.");
+        }
+        navigatorController.setHeaderVisible(true);
+    }
 }

@@ -1,47 +1,129 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.MenuButton?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.example.onetour.graphiccontroller.NavigatorController">
 
+    <!-- ================= HEADER ================= -->
     <top>
-        <HBox spacing="10" prefHeight="50" style="-fx-padding: 10;">
-            <Region HBox.hgrow="ALWAYS"/>
+        <VBox style="-fx-background-color: white;">
 
-            <Button fx:id="bookingsButton"
-                    text="Prenotazioni"
-                    visible="false"
-                    managed="false"
-                    onAction="#onBookingsClicked"/>
+            <!-- HEADER BAR -->
+            <HBox fx:id="headerBar"
+                  spacing="16"
+                  alignment="CENTER_LEFT"
+                  prefHeight="70"
+                  style="-fx-padding: 10 20;">
 
-            <Button fx:id="loginButton"
-                    text="Login"
-                    onAction="#onLoginHeaderClicked"/>
+                <ImageView fitHeight="56" preserveRatio="true">
+                    <image>
+                        <Image url="@images/logo.png"/>
+                    </image>
+                </ImageView>
 
-            <MenuButton fx:id="userMenu"
-                        text="User"
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button fx:id="bookingsButton"
+                        text="Prenotazioni"
                         visible="false"
-                        managed="false">
-                <items>
-                    <MenuItem fx:id="userInfoItem" text="-" disable="true"/>
-                    <SeparatorMenuItem/>
-                    <MenuItem text="Logout" onAction="#onLogoutClicked"/>
-                </items>
-            </MenuButton>
-        </HBox>
+                        managed="false"
+                        onAction="#onBookingsClicked"
+                        contentDisplay="TOP"
+                        graphicTextGap="4"
+                        style="-fx-background-color: transparent; -fx-cursor: hand;">
+                    <graphic>
+                        <ImageView fitWidth="26" fitHeight="26" preserveRatio="true">
+                            <image>
+                                <Image url="@images/ticket.png"/>
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+
+                <!-- AREA USER -->
+                <VBox alignment="TOP_RIGHT" spacing="6">
+
+                    <!-- BOTTONE USER (icona + nome sotto) -->
+                    <Button fx:id="userButton"
+                            visible="false"
+                            managed="false"
+                            onAction="#onUserButtonClicked"
+                            contentDisplay="TOP"
+                            graphicTextGap="4"
+                            style="-fx-background-color: transparent; -fx-cursor: hand;">
+                        <graphic>
+                            <ImageView fitWidth="26" fitHeight="26" preserveRatio="true">
+                                <image>
+                                    <Image url="@images/user.png"/>
+                                </image>
+                            </ImageView>
+                        </graphic>
+                    </Button>
+
+                    <!-- LOGIN (se non loggato) -->
+                    <Button fx:id="loginButton"
+                            text="Login"
+                            onAction="#onLoginHeaderClicked"
+                            contentDisplay="TOP"
+                            graphicTextGap="4"
+                            style="-fx-background-color: transparent; -fx-cursor: hand;">
+                        <graphic>
+                            <ImageView fitWidth="26" fitHeight="26" preserveRatio="true">
+                                <image>
+                                    <Image url="@images/user.png"/>
+                                </image>
+                            </ImageView>
+                        </graphic>
+                    </Button>
+
+                </VBox>
+
+            </HBox>
+
+            <!-- CARD USER: seconda riga nel TOP, NON viene clippata -->
+            <HBox alignment="TOP_RIGHT" style="-fx-padding: 0 20 10 20;">
+                <VBox fx:id="userCard"
+                      visible="false"
+                      managed="false"
+                      spacing="8"
+                      alignment="CENTER"
+                      style="
+                    -fx-background-color: white;
+                    -fx-border-color: black;
+                    -fx-border-radius: 14;
+                    -fx-background-radius: 14;
+                    -fx-padding: 14;
+                    -fx-min-width: 220;
+                    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 16, 0, 0, 6);
+                  ">
+
+                    <Label fx:id="helloLabel" text="Hello" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="emailLabel" text="-" style="-fx-text-fill: #555;"/>
+
+                    <Button text="Logout"
+                            onAction="#onLogoutClicked"
+                            style="-fx-background-color: #F2C4A5; -fx-background-radius: 10; -fx-padding: 6 18; -fx-cursor: hand;"/>
+                </VBox>
+            </HBox>
+
+        </VBox>
     </top>
 
+
+    <!-- ================= CONTENT ================= -->
     <center>
-        <AnchorPane fx:id="contentPane"/>
+        <AnchorPane fx:id="contentPane" style="-fx-background-color: white;"/>
     </center>
 
 </BorderPane>

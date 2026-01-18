@@ -7,9 +7,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.MenuItem;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -19,20 +20,17 @@ public class NavigatorController {
 
     private static final Logger logger = Logger.getLogger(NavigatorController.class.getName());
 
-    @FXML
-    private Button loginButton;
+    @FXML private HBox headerBar;
+    @FXML private AnchorPane contentPane;
 
-    @FXML
-    private Button bookingsButton;
+    @FXML private Button loginButton;
+    @FXML private Button bookingsButton;
 
-    @FXML
-    private MenuButton userMenu;
-
-    @FXML
-    private MenuItem userInfoItem;
-
-    @FXML
-    private AnchorPane contentPane;
+    // User area (icon + card)
+    @FXML private Button userButton;
+    @FXML private VBox userCard;
+    @FXML private Label helloLabel;
+    @FXML private Label emailLabel;
 
     @FXML
     public void initialize() {
@@ -40,6 +38,12 @@ public class NavigatorController {
 
         setCenter("/fxml/pages/page1_landing.fxml");
         refreshHeader();
+    }
+
+    public void setHeaderVisible(boolean visible) {
+        if (headerBar == null) return;
+        headerBar.setVisible(visible);
+        headerBar.setManaged(visible);
     }
 
     public void setCenter(String fxmlPath) {
@@ -51,6 +55,15 @@ public class NavigatorController {
             AnchorPane.setBottomAnchor(page, 0.0);
             AnchorPane.setLeftAnchor(page, 0.0);
             AnchorPane.setRightAnchor(page, 0.0);
+            boolean hideHeader =
+                    "/fxml/pages/page2_login.fxml".equals(fxmlPath) ||
+                            "/fxml/pages/page3_signup.fxml".equals(fxmlPath);
+
+            setHeaderVisible(!hideHeader);
+            if (userCard != null) {
+                userCard.setVisible(false);
+                userCard.setManaged(false);
+            }
 
             refreshHeader();
 
@@ -62,14 +75,29 @@ public class NavigatorController {
     }
 
     public void refreshHeader() {
+        if (headerBar != null && (!headerBar.isVisible() || !headerBar.isManaged())) {
+            return;
+        }
+
         Session session = SessionManagerSingleton.getInstance().getCurrentSession();
 
+        // NOT LOGGED
         if (session == null || session.getUser() == null) {
-            loginButton.setVisible(true);
-            loginButton.setManaged(true);
+            if (loginButton != null) {
+                loginButton.setVisible(true);
+                loginButton.setManaged(true);
+            }
 
-            userMenu.setVisible(false);
-            userMenu.setManaged(false);
+            if (userButton != null) {
+                userButton.setVisible(false);
+                userButton.setManaged(false);
+                userButton.setText(""); // pulizia
+            }
+
+            if (userCard != null) {
+                userCard.setVisible(false);
+                userCard.setManaged(false);
+            }
 
             if (bookingsButton != null) {
                 bookingsButton.setVisible(false);
@@ -78,17 +106,23 @@ public class NavigatorController {
             return;
         }
 
+        // LOGGED
         UserAccount user = session.getUser();
 
-        loginButton.setVisible(false);
-        loginButton.setManaged(false);
+        if (loginButton != null) {
+            loginButton.setVisible(false);
+            loginButton.setManaged(false);
+        }
 
-        userMenu.setVisible(true);
-        userMenu.setManaged(true);
+        if (userButton != null) {
+            userButton.setVisible(true);
+            userButton.setManaged(true);
+        }
 
+        boolean isGuide = (user.getRole() == com.example.onetour.enumeration.RoleEnum.TOURISTGUIDE);
         if (bookingsButton != null) {
-            bookingsButton.setVisible(true);
-            bookingsButton.setManaged(true);
+            bookingsButton.setVisible(!isGuide);
+            bookingsButton.setManaged(!isGuide);
         }
 
         String fullName = user.getFullName();
@@ -98,8 +132,24 @@ public class NavigatorController {
                 ? user.getUserEmail()
                 : "-";
 
-        userMenu.setText(fullName);
-        userInfoItem.setText(fullName + " • " + email);
+        if (userButton != null) {
+            userButton.setText(fullName);
+        }
+
+        if (helloLabel != null) {
+            helloLabel.setText("Hello, " + fullName);
+        }
+        if (emailLabel != null) {
+            emailLabel.setText(email);
+        }
+    }
+
+    @FXML
+    private void onUserButtonClicked() {
+        if (userCard == null) return;
+        boolean show = !userCard.isVisible();
+        userCard.setVisible(show);
+        userCard.setManaged(show);
     }
 
     @FXML
@@ -119,6 +169,11 @@ public class NavigatorController {
             SessionManagerSingleton.getInstance().removeSession(session.getSessionID());
         }
         SessionManagerSingleton.getInstance().clearCurrentSession();
+
+        if (userCard != null) {
+            userCard.setVisible(false);
+            userCard.setManaged(false);
+        }
 
         refreshHeader();
         setCenter("/fxml/pages/page2_login.fxml");

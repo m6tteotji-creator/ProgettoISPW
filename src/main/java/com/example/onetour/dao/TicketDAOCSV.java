@@ -5,8 +5,8 @@ import com.example.onetour.enumeration.TicketState;
 import com.example.onetour.exception.DuplicateTicketException;
 import com.example.onetour.exception.TicketNotFoundException;
 import com.example.onetour.exception.TourNotFoundException;
-import com.example.onetour.model.Tour;
 import com.example.onetour.model.Ticket;
+import com.example.onetour.model.Tour;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvValidationException;
@@ -36,6 +36,7 @@ public class TicketDAOCSV extends TicketDAO {
             Path.of(System.getProperty("user.home"), "onetour-data", "tickets.csv");
 
     private final File fd;
+    private final TourDAO tourDAO;
 
     public TicketDAOCSV() {
         try {
@@ -44,10 +45,13 @@ public class TicketDAOCSV extends TicketDAO {
 
             if (!fd.exists()) {
                 boolean created = fd.createNewFile();
-                logger.log(Level.INFO, () -> created
-                        ? "CSV created: " + fd.getAbsolutePath()
-                        : "CSV already exists: " + fd.getAbsolutePath());
+                if (!created) {
+                    throw new IOException("Failed to create CSV file: " + fd.getAbsolutePath());
+                }
             }
+
+            this.tourDAO = buildTourDAO();
+
         } catch (IOException e) {
             throw new CSVPersistenceException("Cannot initialize TicketDAOCSV: " + CSV_PATH, e);
         }
@@ -74,11 +78,13 @@ public class TicketDAOCSV extends TicketDAO {
         }
 
         try {
-            List<Ticket> res = readFiltered(row -> safeEq(row, IDX_USER_EMAIL, userEmail));
+            List<Ticket> res = readFiltered(row -> sameUserEmail(row, userEmail));
+
             if (res.isEmpty()) {
                 throw new TicketNotFoundException("No tickets for user: " + userEmail);
             }
             return res;
+
         } catch (IOException | CsvValidationException e) {
             throw new CSVPersistenceException("CSV persistence error (retrieveByUser)", e);
         }
@@ -146,7 +152,7 @@ public class TicketDAOCSV extends TicketDAO {
             boolean updated = false;
 
             for (String[] row : rows) {
-                if (row.length >= 5 && safeEq(row, IDX_TICKET_ID, ticketID)) {
+                if (sameTicketId(row, ticketID)) {
                     row[IDX_STATE] = newState.name();
                     updated = true;
                     break;
@@ -158,6 +164,7 @@ public class TicketDAOCSV extends TicketDAO {
             }
 
             rewriteAll(rows);
+
         } catch (IOException | CsvValidationException e) {
             throw new CSVPersistenceException("CSV persistence error (modifyState)", e);
         }
@@ -168,9 +175,10 @@ public class TicketDAOCSV extends TicketDAO {
         if (tourId == null || tourId.isBlank()) return false;
 
         try {
-            Tour tour = buildTourDAO().retrieveTourFromId(tourId);
+            Tour tour = tourDAO.retrieveTourFromId(tourId);
             if (tour.getTouristGuide() == null || tour.getTouristGuide().getEmail() == null) return false;
             return tour.getTouristGuide().getEmail().equalsIgnoreCase(guideEmail);
+
         } catch (SQLException | TourNotFoundException e) {
             logger.log(Level.WARNING, e, () -> "Skipping row: cannot rebuild Tour for tour_id=" + tourId);
             return false;
@@ -195,7 +203,7 @@ public class TicketDAOCSV extends TicketDAO {
         try (CSVReader r = new CSVReader(new BufferedReader(new FileReader(fd)))) {
             String[] row;
             while ((row = r.readNext()) != null) {
-                if (row.length >= 5 && safeEq(row, IDX_TICKET_ID, ticketID)) return true;
+                if (sameTicketId(row, ticketID)) return true;
             }
             return false;
         }
@@ -215,13 +223,25 @@ public class TicketDAOCSV extends TicketDAO {
         }
     }
 
+    /**
+     * Reads rows matching a predicate and maps them to Ticket.
+     * If a row references a Tour that no longer exists, it is skipped (no crash).
+     */
     private List<Ticket> readFiltered(RowPredicate predicate) throws IOException, CsvValidationException {
         List<Ticket> out = new ArrayList<>();
         try (CSVReader r = new CSVReader(new BufferedReader(new FileReader(fd)))) {
             String[] row;
             while ((row = r.readNext()) != null) {
                 if (row.length < 5) continue;
-                if (predicate.test(row)) out.add(mapRowToTicket(row));
+                if (!predicate.test(row)) continue;
+
+                try {
+                    out.add(mapRowToTicket(row));
+                } catch (CSVPersistenceException ex) {
+                    // CSV can contain old tickets referencing removed tours (e.g., T001 after seed change).
+                    // We skip the row instead of crashing the whole flow.
+                    logger.log(Level.WARNING, () -> ex.getMessage());
+                }
             }
         }
         return out;
@@ -254,7 +274,7 @@ public class TicketDAOCSV extends TicketDAO {
 
         Tour tour;
         try {
-            tour = buildTourDAO().retrieveTourFromId(tourID);
+            tour = tourDAO.retrieveTourFromId(tourID);
         } catch (SQLException | TourNotFoundException e) {
             throw new CSVPersistenceException("Cannot rebuild Tour from id in CSV: " + tourID, e);
         }
@@ -263,7 +283,6 @@ public class TicketDAOCSV extends TicketDAO {
         t.setTour(tour);
         return t;
     }
-
 
     private TourDAO buildTourDAO() {
         String persistence = AppConfig.getInstance()
@@ -281,12 +300,18 @@ public class TicketDAOCSV extends TicketDAO {
         };
     }
 
-    private boolean safeEq(String[] row, int idx, String value) {
+    private boolean sameTicketId(String[] row, String ticketId) {
         return row != null
-                && idx >= 0
-                && idx < row.length
-                && row[idx] != null
-                && row[idx].equals(value);
+                && row.length > IDX_TICKET_ID
+                && ticketId != null
+                && ticketId.equals(row[IDX_TICKET_ID]);
+    }
+
+    private boolean sameUserEmail(String[] row, String userEmail) {
+        return row != null
+                && row.length > IDX_USER_EMAIL
+                && userEmail != null
+                && userEmail.equalsIgnoreCase(row[IDX_USER_EMAIL]);
     }
 
     @FunctionalInterface

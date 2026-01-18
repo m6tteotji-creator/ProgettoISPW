@@ -22,6 +22,11 @@ public class LoginGraphicController {
     @FXML private Label errorLabel;
 
     @FXML
+    public void initialize() {
+        NavigatorBase.hideHeader();
+    }
+
+    @FXML
     private void onSignUpClicked() {
         errorLabel.setText("");
         NavigatorBase.goTo("/fxml/pages/page3_signup.fxml");
@@ -59,6 +64,7 @@ public class LoginGraphicController {
             }
 
             UserAccount user = session.getUser();
+            NavigatorBase.showHeader();
             NavigatorBase.refreshHeader();
 
             if (user.getRole() == RoleEnum.TOURISTGUIDE) {
