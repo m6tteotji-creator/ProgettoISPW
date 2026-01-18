@@ -35,7 +35,7 @@ public class TourDAOJDBC extends TourDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    out.add(mapRow(rs));
+                    out.add(mapRow(conn, rs)); // <-- passa conn
                 }
             }
         }
@@ -63,7 +63,7 @@ public class TourDAOJDBC extends TourDAO {
                             "Tour not found with id: " + tourID
                     );
                 }
-                return mapRow(rs);
+                return mapRow(conn, rs); // <-- passa conn
             }
         }
     }
@@ -88,12 +88,15 @@ public class TourDAOJDBC extends TourDAO {
                             "Tour not found: " + tourName
                     );
                 }
-                return mapRow(rs);
+                return mapRow(conn, rs); // <-- passa conn
             }
         }
     }
 
-    private Tour mapRow(ResultSet rs) throws SQLException {
+    // -------------------------
+    // MAPPING
+    // -------------------------
+    private Tour mapRow(Connection conn, ResultSet rs) throws SQLException {
         String tourID = rs.getString("tour_id");
         String nameTour = rs.getString("name_tour");
         String cityName = rs.getString("city_name");
@@ -105,9 +108,37 @@ public class TourDAOJDBC extends TourDAO {
 
         String guideEmail = rs.getString("guide_email");
         if (guideEmail != null && !guideEmail.isBlank()) {
-            t.setTouristGuide(new TouristGuide(null, "", "", guideEmail));
+            TouristGuide guide = retrieveGuideByEmail(conn, guideEmail);
+
+            // fallback: almeno email (ma con questa query di solito lo trovi sempre)
+            if (guide == null) {
+                guide = new TouristGuide(null, "", "", guideEmail);
+            }
+            t.setTouristGuide(guide);
         }
 
         return t;
+    }
+
+    private TouristGuide retrieveGuideByEmail(Connection conn, String guideEmail) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement(Queries.FIND_GUIDE_BY_EMAIL)) {
+            ps.setString(1, guideEmail);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return null;
+
+                String guideId = rs.getString("guide_id");
+                String name = rs.getString("name");
+                String surname = rs.getString("surname");
+                String email = rs.getString("guide_email");
+
+                return new TouristGuide(
+                        guideId,
+                        name == null ? "" : name,
+                        surname == null ? "" : surname,
+                        email == null ? guideEmail : email
+                );
+            }
+        }
     }
 }

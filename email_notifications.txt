@@ -52,3 +52,12 @@ TOUR ID: null
 Your booking request has been ACCEPTED.
 =====================================
 
+=====================================
+DATE: 2026-01-18T15:34:24.081808434
+FROM (Guide): null
+TO (User): null
+TOUR ID: null
+-------------------------------------
+Your booking request has been REJECTED.
+=====================================
+

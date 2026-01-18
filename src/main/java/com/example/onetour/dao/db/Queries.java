@@ -32,7 +32,6 @@ public final class Queries {
                     "JOIN tours tr ON tr.tour_id = t.tour_id " +
                     "WHERE tr.guide_email = ?";
 
-
     // =========================
     // TOURS
     // =========================
@@ -60,4 +59,12 @@ public final class Queries {
             "SELECT guide_id, name, surname, guide_email " +
                     "FROM tourist_guides " +
                     "WHERE guide_email = ? AND password = ?";
+
+    // =========================
+    // GUIDES (NEW)
+    // =========================
+    public static final String FIND_GUIDE_BY_EMAIL =
+            "SELECT guide_id, name, surname, guide_email " +
+                    "FROM tourist_guides " +
+                    "WHERE guide_email = ?";
 }

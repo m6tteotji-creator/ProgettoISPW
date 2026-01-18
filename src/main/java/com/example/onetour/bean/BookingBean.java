@@ -16,7 +16,7 @@ public class BookingBean implements Serializable {
     private LocalDate bookingDate;
     private TicketState state;
 
-    private String guideName;
+    private String guideName;   // nome + cognome
     private String tourName;
 
     public BookingBean() {}
@@ -33,6 +33,7 @@ public class BookingBean implements Serializable {
 
     public static BookingBean fromModel(Ticket ticket) {
         BookingBean b = new BookingBean();
+
         b.setTicketID(ticket.getTicketID());
         b.setBookingDate(ticket.getBookingDate());
         b.setState(ticket.getState());
@@ -43,7 +44,16 @@ public class BookingBean implements Serializable {
 
             TouristGuide guide = tour.getTouristGuide();
             if (guide != null) {
-                b.setGuideName(guide.getName());
+                String nome = guide.getName();
+                String cognome = guide.getSurname();
+
+                if (nome != null && cognome != null) {
+                    b.setGuideName(nome + " " + cognome);
+                } else if (nome != null) {
+                    b.setGuideName(nome);
+                } else if (cognome != null) {
+                    b.setGuideName(cognome);
+                }
             }
         }
         return b;

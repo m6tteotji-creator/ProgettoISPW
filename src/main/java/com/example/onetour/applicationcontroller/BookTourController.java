@@ -102,7 +102,6 @@ public class BookTourController {
         if (user.getRole() == RoleEnum.TOURISTGUIDE) {
             throw new InvalidFormatException("Operation not allowed: guides cannot book tours");
         }
-
         String userEmail = user.getUserEmail();
         if (userEmail == null || userEmail.isBlank()) throw new InvalidFormatException("Invalid user email");
 
