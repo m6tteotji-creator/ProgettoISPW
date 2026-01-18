@@ -1,9 +1,10 @@
 package com.example.onetour.graphiccontroller;
 
+import com.example.onetour.applicationcontroller.BookTourController;
 import com.example.onetour.bean.TourBean;
+import com.example.onetour.exception.InvalidFormatException;
 import com.example.onetour.exception.TourNotFoundException;
 import com.example.onetour.model.Session;
-import com.example.onetour.model.Tour;
 import com.example.onetour.sessionmanagement.SessionManagerSingleton;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -18,6 +19,8 @@ import java.util.logging.Logger;
 public class TourListController {
 
     private static final Logger logger = Logger.getLogger(TourListController.class.getName());
+
+    private final BookTourController bookTourController = new BookTourController();
 
     @FXML
     private ListView<TourBean> tourListView;
@@ -44,8 +47,6 @@ public class TourListController {
         tourListView.setItems(FXCollections.observableArrayList(beans));
     }
 
-    // *** MODIFICA QUI: Ho rimosso l'annidamento profondo. ***
-    // Invece di scrivere tutta la logica dentro new ListCell, delego a un metodo helper.
     private void setupClickableCells() {
         tourListView.setCellFactory(listView -> new ListCell<>() {
             @Override
@@ -56,8 +57,6 @@ public class TourListController {
         });
     }
 
-    // *** MODIFICA QUI: Nuovo metodo helper per gestire la logica della cella ***
-    // Questo riduce drasticamente la "Cognitive Complexity" perché non è più annidato.
     private void handleCellUpdate(ListCell<TourBean> cell, TourBean item, boolean empty) {
         if (empty || item == null) {
             cell.setText(null);
@@ -67,7 +66,6 @@ public class TourListController {
 
         cell.setText(formatCellText(item));
 
-        // Assegno l'evento click
         cell.setOnMouseClicked(evt -> {
             if (!cell.isEmpty()) {
                 onTourSelected(item);
@@ -75,7 +73,6 @@ public class TourListController {
         });
     }
 
-    // *** MODIFICA QUI: Estratta anche la logica di formattazione del testo ***
     private String formatCellText(TourBean item) {
         String title = (item.getTourName() != null && !item.getTourName().isBlank())
                 ? item.getTourName()
@@ -88,33 +85,34 @@ public class TourListController {
     private void onTourSelected(TourBean selected) {
         try {
             Session session = SessionManagerSingleton.getInstance().getCurrentSession();
-            if (session == null || session.getLastTourList() == null) {
+            if (session == null || session.getSessionID() == null || session.getSessionID().isBlank()) {
                 showErrorDialog("Sessione non valida. Effettua di nuovo il login.");
                 NavigatorBase.goTo("/fxml/pages/page2_login.fxml");
                 return;
             }
 
-            // *** MODIFICA QUI: Ho estratto la ricerca in un metodo separato per pulire onTourSelected ***
-            Tour tourModel = findTourInSession(session, selected.getTourID());
+            if (selected.getTourID() == null || selected.getTourID().isBlank()) {
+                showErrorDialog("Tour non valido (manca tourID).");
+                return;
+            }
 
-            session.setActualTour(tourModel);
+            TourBean in = new TourBean();
+            in.setSessionID(session.getSessionID());
+            in.setTourID(selected.getTourID());
+
+            bookTourController.getTourDescription(in);
+
             NavigatorBase.goTo("/fxml/pages/page6_details.fxml");
 
-        } catch (TourNotFoundException e) {
+        } catch (TourNotFoundException | InvalidFormatException e) {
             logger.log(Level.WARNING, e.getMessage());
             showErrorDialog(e.getMessage());
+
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             showErrorDialog("Errore durante la selezione del tour.");
         }
-    }
 
-    // *** MODIFICA QUI: Helper per la ricerca stream, riduce la complessità del metodo chiamante ***
-    private Tour findTourInSession(Session session, String tourId) throws TourNotFoundException {
-        return session.getLastTourList().stream()
-                .filter(t -> t.getTourID() != null && t.getTourID().equals(tourId))
-                .findFirst()
-                .orElseThrow(() -> new TourNotFoundException("Tour non trovato."));
     }
 
     private void showInfoDialog() {

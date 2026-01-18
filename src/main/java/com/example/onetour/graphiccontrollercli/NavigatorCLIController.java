@@ -7,7 +7,7 @@ public class NavigatorCLIController {
     protected static final Scanner SC = new Scanner(System.in);
 
     protected String readLine(String prompt) {
-        CLIPrinter.print(prompt);
+        CLIPrinter.printMessage(prompt);
         return SC.nextLine().trim();
     }
 
@@ -17,12 +17,14 @@ public class NavigatorCLIController {
             try {
                 int v = Integer.parseInt(s);
                 if (v < min || v > max) {
-                    CLIPrinter.println("Scelta non valida. Inserisci un numero tra " + min + " e " + max + ".");
+                    CLIPrinter.printMessage(
+                            "Scelta non valida. Inserisci un numero tra " + min + " e " + max + ".\n"
+                    );
                     continue;
                 }
                 return v;
             } catch (NumberFormatException e) {
-                CLIPrinter.println("Formato non valido. Inserisci un numero.");
+                CLIPrinter.printMessage("Formato non valido. Inserisci un numero.\n");
             }
         }
     }

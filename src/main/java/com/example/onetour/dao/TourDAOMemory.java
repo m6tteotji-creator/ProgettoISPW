@@ -17,6 +17,11 @@ public class TourDAOMemory extends TourDAO {
     private static void initSeed() {
         if (initialized) return;
 
+        TouristGuide gTest = new TouristGuide(
+                "G_TEST", "Guida", "Test", "guide@test.com",
+                List.of("IT", "EN")
+        );
+
         TouristGuide g1 = new TouristGuide(
                 "G001", "Marco", "Rossi", "guide1@guide.com",
                 List.of("IT", "EN")
@@ -27,7 +32,13 @@ public class TourDAOMemory extends TourDAO {
                 List.of("IT", "FR", "EN")
         );
 
-        // --- TOURS ---
+        Tour tTest = new Tour(
+                "T_TEST_1", "Tour Test", "Roma",
+                LocalDate.of(2026, 1, 20), LocalDate.of(2026, 1, 25), 99.90
+        );
+        tTest.setAttractions(List.of("Colosseo", "Centro Storico"));
+        tTest.setTouristGuide(gTest);
+
         Tour t1 = new Tour(
                 "T001", "Colosseo Experience", "Roma",
                 LocalDate.of(2026, 2, 10), LocalDate.of(2026, 2, 12), 25.0
@@ -56,6 +67,7 @@ public class TourDAOMemory extends TourDAO {
         t4.setAttractions(List.of("Canal Grande", "Rialto", "San Marco"));
         t4.setTouristGuide(g2);
 
+        SEED.add(tTest);
         SEED.add(t1);
         SEED.add(t2);
         SEED.add(t3);
@@ -89,7 +101,6 @@ public class TourDAOMemory extends TourDAO {
 
     @Override
     public Tour retrieveTourFromId(String tourID) throws SQLException, TourNotFoundException {
-
         initSeed();
 
         if (tourID == null || tourID.isBlank()) throw new IllegalArgumentException("tourID null/blank");

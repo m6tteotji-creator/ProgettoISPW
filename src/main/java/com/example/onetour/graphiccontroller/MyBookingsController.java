@@ -28,24 +28,29 @@ public class MyBookingsController {
     private Label hintLabel;
 
     @FXML
+    private Button backButton;
+
+    @FXML
     public void initialize() {
         NavigatorBase.refreshHeader();
         setupCellRendering();
         loadMyBookings();
     }
 
+    @FXML
+    private void onBackClicked() {
+        NavigatorBase.goTo("/fxml/pages/page4_home.fxml");
+    }
+
     private void loadMyBookings() {
         try {
             Session session = SessionManagerSingleton.getInstance().getCurrentSession();
-
-            // *** MODIFICA QUI: Estratta la condizione complessa in un metodo helper ***
             if (isSessionInvalid(session)) {
                 showErrorDialog("Sessione non valida. Effettua di nuovo il login.");
                 NavigatorBase.goTo("/fxml/pages/page2_login.fxml");
                 return;
             }
 
-            // La logica principale è ora pulita
             fetchAndDisplayBookings(session.getSessionID());
 
         } catch (TicketNotFoundException e) {
@@ -63,12 +68,10 @@ public class MyBookingsController {
         }
     }
 
-    // *** MODIFICA QUI: Helper per validare la sessione ***
     private boolean isSessionInvalid(Session session) {
         return session == null || session.getUser() == null || session.getSessionID() == null || session.getSessionID().isBlank();
     }
 
-    // *** MODIFICA QUI: Helper per recuperare e mostrare i dati ***
     private void fetchAndDisplayBookings(String sessionId) throws Exception {
         List<BookingBean> bookings = bookTourController.getMyBookings(sessionId);
         bookingsListView.setItems(FXCollections.observableArrayList(bookings));
@@ -80,7 +83,6 @@ public class MyBookingsController {
         }
     }
 
-    // *** MODIFICA QUI: Rimosso l'annidamento profondo nella creazione della cella ***
     private void setupCellRendering() {
         bookingsListView.setCellFactory(list -> new ListCell<>() {
             @Override
@@ -91,18 +93,14 @@ public class MyBookingsController {
         });
     }
 
-    // *** MODIFICA QUI: Nuovo metodo helper che configura la cella ***
     private void configureCell(ListCell<BookingBean> cell, BookingBean item, boolean empty) {
         if (empty || item == null) {
             cell.setText(null);
             return;
         }
-        // Delego la costruzione della stringa complessa a un altro metodo
         cell.setText(buildBookingText(item));
     }
 
-    // *** MODIFICA QUI: Nuovo metodo helper per costruire il testo (Line1 + Line2) ***
-    // Questo rende la logica lineare e facile da leggere per SonarCloud
     private String buildBookingText(BookingBean item) {
         String tour = safe(item.getTourName());
         String guide = safe(item.getGuideName());

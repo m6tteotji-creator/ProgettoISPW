@@ -44,7 +44,6 @@ public class TicketDAOCSV extends TicketDAO {
 
             if (!fd.exists()) {
                 boolean created = fd.createNewFile();
-                // Uso lambda per il logger (best practice)
                 logger.log(Level.INFO, () -> created
                         ? "CSV created: " + fd.getAbsolutePath()
                         : "CSV already exists: " + fd.getAbsolutePath());
@@ -265,10 +264,21 @@ public class TicketDAOCSV extends TicketDAO {
         return t;
     }
 
+
     private TourDAO buildTourDAO() {
-        String mode = AppConfig.getInstance().get("app.mode", "DEMO").trim().toUpperCase();
-        if ("DEMO".equals(mode)) return new TourDAOMemory();
-        return new TourDAOJDBC();
+        String persistence = AppConfig.getInstance()
+                .get("tour.persistence", "MEMORY")
+                .trim()
+                .toUpperCase();
+
+        return switch (persistence) {
+            case "MEMORY", "DEMO" -> new TourDAOMemory();
+            case "JDBC", "MYSQL" -> new TourDAOJDBC();
+            default -> {
+                logger.log(Level.WARNING, () -> "Unsupported tour.persistence=" + persistence + " -> fallback MEMORY");
+                yield new TourDAOMemory();
+            }
+        };
     }
 
     private boolean safeEq(String[] row, int idx, String value) {

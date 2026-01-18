@@ -12,6 +12,7 @@ import com.example.onetour.dao.TourDAO;
 import com.example.onetour.dao.TourDAOJDBC;
 import com.example.onetour.dao.TourDAOMemory;
 import com.example.onetour.enumeration.RoleEnum;
+import com.example.onetour.enumeration.TicketState;
 import com.example.onetour.exception.DuplicateTicketException;
 import com.example.onetour.exception.InvalidFormatException;
 import com.example.onetour.exception.TicketNotFoundException;
@@ -102,21 +103,67 @@ public class BookTourController {
         if (user.getRole() == RoleEnum.TOURISTGUIDE) {
             throw new InvalidFormatException("Operation not allowed: guides cannot book tours");
         }
+
         String userEmail = user.getUserEmail();
         if (userEmail == null || userEmail.isBlank()) throw new InvalidFormatException("Invalid user email");
 
-        Tour selectedTour = SessionManagerSingleton.getInstance().getSession(sessionID).getActualTour();
-        if (selectedTour == null) throw new InvalidFormatException("No selected tour");
+        // ✅ PRENDO TOURID DAL BEAN (NON DALLA SESSIONE)
+        String tourId = bookingBean.getTourID();
+        if (tourId == null || tourId.isBlank()) {
+            // fallback (ma in GUI non dovrebbe mai succedere dopo la patch)
+            Tour fallback = SessionManagerSingleton.getInstance().getSession(sessionID).getActualTour();
+            if (fallback == null || fallback.getTourID() == null || fallback.getTourID().isBlank()) {
+                throw new InvalidFormatException("No selected tour");
+            }
+            tourId = fallback.getTourID();
+        }
 
-        Ticket ticket = new Ticket(userEmail, selectedTour);
+        // ✅ ricarico il tour dal DAO, così ho sempre il tour corretto
+        TourDAO tourDAO = buildTourDAO();
+        final Tour selectedTour;
+        try {
+            selectedTour = tourDAO.retrieveTourFromId(tourId);
+        } catch (SQLException e) {
+            throw new InvalidFormatException("Persistence error while retrieving tour", e);
+        } catch (TourNotFoundException e) {
+            throw new InvalidFormatException("Tour not found");
+        }
+
+        // aggiorno la sessione per coerenza UI
+        SessionManagerSingleton.getInstance().getSession(sessionID).setActualTour(selectedTour);
 
         TicketDAO ticketDAO = buildTicketDAO();
+
+        try {
+            List<Ticket> existing = ticketDAO.retrieveByUser(userEmail);
+
+            for (Ticket t : existing) {
+                if (t == null || t.getTour() == null) continue;
+                String existingTourId = t.getTour().getTourID();
+                if (existingTourId == null) continue;
+
+                if (!existingTourId.equals(tourId)) continue;
+
+                TicketState st = t.getState();
+                if (st == TicketState.PENDING || st == TicketState.CONFIRMED) {
+                    throw new DuplicateTicketException(
+                            "You already have an active booking request for this tour (state=" + st + ")."
+                    );
+                }
+            }
+        } catch (TicketNotFoundException ignored) {
+            // nessun ticket esistente
+        }
+
+        Ticket ticket = new Ticket(userEmail, selectedTour);
         ticketDAO.create(ticket);
 
         BookingBean out = BookingBean.fromModel(ticket);
         out.setSessionID(sessionID);
         return out;
     }
+
+
 
     public List<BookingBean> getMyBookings(String sessionID)
             throws InvalidFormatException, TicketNotFoundException {

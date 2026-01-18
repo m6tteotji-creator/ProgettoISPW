@@ -2,7 +2,9 @@ package com.example.onetour.graphiccontroller;
 
 import com.example.onetour.applicationcontroller.BookTourController;
 import com.example.onetour.bean.BookingBean;
+import com.example.onetour.bean.TourBean;
 import com.example.onetour.exception.InvalidFormatException;
+import com.example.onetour.exception.TourNotFoundException;
 import com.example.onetour.model.Session;
 import com.example.onetour.model.Tour;
 import com.example.onetour.sessionmanagement.SessionManagerSingleton;
@@ -19,11 +21,8 @@ import java.util.logging.Logger;
 
 public class GuidedTourController {
 
-    private static final Logger logger =
-            Logger.getLogger(GuidedTourController.class.getName());
-
-    private final BookTourController bookTourController =
-            new BookTourController();
+    private static final Logger logger = Logger.getLogger(GuidedTourController.class.getName());
+    private final BookTourController bookTourController = new BookTourController();
 
     @FXML private Label tourNameLabel;
     @FXML private Label cityLabel;
@@ -38,14 +37,8 @@ public class GuidedTourController {
         NavigatorBase.refreshHeader();
         statusLabel.setText("");
 
-        Session session = SessionManagerSingleton
-                .getInstance()
-                .getCurrentSession();
-
-        if (session == null ||
-                session.getSessionID() == null ||
-                session.getSessionID().isBlank()) {
-
+        Session session = SessionManagerSingleton.getInstance().getCurrentSession();
+        if (session == null || session.getSessionID() == null || session.getSessionID().isBlank()) {
             goBackToLogin();
             return;
         }
@@ -54,6 +47,30 @@ public class GuidedTourController {
         if (actual == null) {
             NavigatorBase.goTo("/fxml/pages/page5_results.fxml");
             return;
+        }
+
+        try {
+            String tourId = actual.getTourID();
+            if (tourId != null && !tourId.isBlank()) {
+                TourBean in = new TourBean();
+                in.setSessionID(session.getSessionID());
+                in.setTourID(tourId);
+
+                bookTourController.getTourDescription(in);
+
+                Tour refreshedModel = SessionManagerSingleton.getInstance()
+                        .getCurrentSession()
+                        .getActualTour();
+
+                if (refreshedModel != null) {
+                    renderTour(refreshedModel);
+                    return;
+                }
+            }
+        } catch (TourNotFoundException | InvalidFormatException e) {
+            logger.log(Level.WARNING, e.getMessage());
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
         }
 
         renderTour(actual);
@@ -76,8 +93,7 @@ public class GuidedTourController {
 
         priceLabel.setText(String.format("%.2f €", t.getPrice()));
 
-        if (t.getTouristGuide() != null &&
-                t.getTouristGuide().getName() != null) {
+        if (t.getTouristGuide() != null && t.getTouristGuide().getName() != null) {
             guideLabel.setText(t.getTouristGuide().getName());
         } else {
             guideLabel.setText("-");
@@ -86,9 +102,7 @@ public class GuidedTourController {
         List<String> attractions = t.getAttractions();
         if (attractions == null) attractions = List.of();
 
-        attractionsListView.setItems(
-                FXCollections.observableArrayList(attractions)
-        );
+        attractionsListView.setItems(FXCollections.observableArrayList(attractions));
     }
 
     @FXML
@@ -108,16 +122,20 @@ public class GuidedTourController {
                 return;
             }
 
+            Tour actual = session.getActualTour();
+            if (actual == null || actual.getTourID() == null || actual.getTourID().isBlank()) {
+                showErrorDialog("Nessun tour selezionato.");
+                NavigatorBase.goTo("/fxml/pages/page5_results.fxml");
+                return;
+            }
+
             BookingBean bookingBean = new BookingBean();
             bookingBean.setSessionID(session.getSessionID());
+            bookingBean.setTourID(actual.getTourID());
 
-            BookingBean created =
-                    bookTourController.createTicket(bookingBean);
+            BookingBean created = bookTourController.createTicket(bookingBean);
 
-            showInfoDialog(
-                    "Prenotazione inviata!\nStato: " + created.getState()
-            );
-
+            showInfoDialog("Prenotazione inviata!\nStato: " + created.getState());
             NavigatorBase.goTo("/fxml/pages/page7_bookings.fxml");
 
         } catch (InvalidFormatException e) {
@@ -134,9 +152,7 @@ public class GuidedTourController {
 
 
     private void goBackToLogin() {
-        showErrorDialog(
-                "Sessione non valida. Effettua di nuovo il login."
-        );
+        showErrorDialog("Sessione non valida. Effettua di nuovo il login.");
         NavigatorBase.goTo("/fxml/pages/page2_login.fxml");
     }
 

@@ -20,7 +20,7 @@ public class TourDetailsCLIController extends NavigatorCLIController {
 
     public void start() {
         if (tourId == null || tourId.isBlank()) {
-            CLIPrinter.println("Errore: tour non valido.");
+            CLIPrinter.printMessage("Errore: tour non valido.\n");
             return;
         }
 
@@ -31,19 +31,18 @@ public class TourDetailsCLIController extends NavigatorCLIController {
             in.setTourID(tourId);
 
             details = bookTourController.getTourDescription(in);
-
         } catch (Exception e) {
-            CLIPrinter.println("Errore nel caricamento dettagli tour: " + e.getMessage());
+            CLIPrinter.printMessage("Errore nel caricamento dettagli tour: " + e.getMessage() + "\n");
             return;
         }
 
         while (true) {
             printDetails(details);
 
-            CLIPrinter.println();
-            CLIPrinter.println("1) Prenota");
-            CLIPrinter.println("2) Vai a Prenotazioni");
-            CLIPrinter.println("0) Indietro");
+            CLIPrinter.printMessage("\n");
+            CLIPrinter.printMessage("1) Prenota\n");
+            CLIPrinter.printMessage("2) Vai a Prenotazioni\n");
+            CLIPrinter.printMessage("0) Indietro\n");
             int choice = readInt("Seleziona: ", 0, 2);
 
             switch (choice) {
@@ -52,27 +51,27 @@ public class TourDetailsCLIController extends NavigatorCLIController {
                 }
                 case 1 -> doBooking();
                 case 2 -> new MyBookingsCLIController(sessionId).start();
-                default -> CLIPrinter.println("Scelta non valida.");
+                default -> CLIPrinter.printMessage("Scelta non valida.\n");
             }
         }
     }
 
     private void printDetails(TourBean t) {
-        CLIPrinter.println();
-        CLIPrinter.println("=== DETTAGLI TOUR ===");
-        CLIPrinter.println("ID: " + safe(t.getTourID()));
-        CLIPrinter.println("Nome tour: " + safe(t.getTourName()));
-        CLIPrinter.println("Città: " + safe(t.getCityName()));
-        CLIPrinter.println("Partenza: " + safeDate(t.getDepartureDate()));
-        CLIPrinter.println("Ritorno: " + safeDate(t.getReturnDate()));
-        CLIPrinter.println("Guida: " + safe(t.getGuideName()));
-        CLIPrinter.println("Prezzo: " + t.getPrice());
+        CLIPrinter.printMessage("\n");
+        CLIPrinter.printMessage("=== DETTAGLI TOUR ===\n");
+        CLIPrinter.printMessage("ID: " + safe(t.getTourID()) + "\n");
+        CLIPrinter.printMessage("Nome tour: " + safe(t.getTourName()) + "\n");
+        CLIPrinter.printMessage("Città: " + safe(t.getCityName()) + "\n");
+        CLIPrinter.printMessage("Partenza: " + safeDate(t.getDepartureDate()) + "\n");
+        CLIPrinter.printMessage("Ritorno: " + safeDate(t.getReturnDate()) + "\n");
+        CLIPrinter.printMessage("Guida: " + safe(t.getGuideName()) + "\n");
+        CLIPrinter.printMessage("Prezzo: " + t.getPrice() + "\n");
 
         List<String> attr = t.getAttractions();
         if (attr != null && !attr.isEmpty()) {
-            CLIPrinter.println("Attrazioni:");
+            CLIPrinter.printMessage("Attrazioni:\n");
             for (String a : attr) {
-                CLIPrinter.println(" - " + safe(a));
+                CLIPrinter.printMessage(" - " + safe(a) + "\n");
             }
         }
     }
@@ -84,11 +83,11 @@ public class TourDetailsCLIController extends NavigatorCLIController {
 
             BookingBean out = bookTourController.createTicket(in);
 
-            CLIPrinter.println("Prenotazione creata!");
-            CLIPrinter.println("Ticket ID: " + safe(out.getTicketID()));
-            CLIPrinter.println("Stato: " + safeState(out.getState()));
+            CLIPrinter.printMessage("Prenotazione creata!\n");
+            CLIPrinter.printMessage("Ticket ID: " + safe(out.getTicketID()) + "\n");
+            CLIPrinter.printMessage("Stato: " + safeState(out.getState()) + "\n");
         } catch (Exception e) {
-            CLIPrinter.println("Errore prenotazione: " + e.getMessage());
+            CLIPrinter.printMessage("Errore prenotazione: " + e.getMessage() + "\n");
         }
     }
 

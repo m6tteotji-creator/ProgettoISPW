@@ -11,16 +11,16 @@ public class LoginCLIController extends NavigatorCLIController {
     private final LoginController loginController = new LoginController();
 
     public void start() {
-        CLIPrinter.println("=== ONE TOUR ===");
+        CLIPrinter.printMessage("=== ONE TOUR ===\n");
 
         while (true) {
-            CLIPrinter.println();
-            CLIPrinter.println("1) Login");
-            CLIPrinter.println("2) Esci");
+            CLIPrinter.printMessage("\n");
+            CLIPrinter.printMessage("1) Login\n");
+            CLIPrinter.printMessage("2) Esci\n");
             int choice = readInt("Seleziona: ", 1, 2);
 
             if (choice == 2) {
-                CLIPrinter.println("Chiusura...");
+                CLIPrinter.printMessage("Chiusura...\n");
                 return;
             }
 
@@ -42,13 +42,13 @@ public class LoginCLIController extends NavigatorCLIController {
             String sessionId = logged.getSessionID();
             Session s = SessionManagerSingleton.getInstance().getSession(sessionId);
             if (s == null || s.getUser() == null) {
-                CLIPrinter.println("Errore: sessione non valida.");
+                CLIPrinter.printMessage("Errore: sessione non valida.\n");
                 return;
             }
 
             RoleEnum role = s.getUser().getRole();
-            CLIPrinter.println("Login OK. Ruolo: " + role.getRoleName());
-            CLIPrinter.println("SessionID: " + sessionId);
+            CLIPrinter.printMessage("Login OK. Ruolo: " + role.getRoleName() + "\n");
+            CLIPrinter.printMessage("SessionID: " + sessionId + "\n");
 
             if (role == RoleEnum.TOURISTGUIDE) {
                 new GuideRequestsCLIController(sessionId).start();
@@ -57,7 +57,7 @@ public class LoginCLIController extends NavigatorCLIController {
             }
 
         } catch (Exception e) {
-            CLIPrinter.println("Login fallito: " + e.getMessage());
+            CLIPrinter.printMessage("Login fallito: " + e.getMessage() + "\n");
         }
     }
 }

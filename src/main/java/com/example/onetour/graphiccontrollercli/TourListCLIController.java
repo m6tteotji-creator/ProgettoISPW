@@ -17,11 +17,11 @@ public class TourListCLIController extends NavigatorCLIController {
 
     public void start() {
         while (true) {
-            CLIPrinter.println();
-            CLIPrinter.println("=== RISULTATI TOUR ===");
+            CLIPrinter.printMessage("\n");
+            CLIPrinter.printMessage("=== RISULTATI TOUR ===\n");
 
             if (tours == null || tours.isEmpty()) {
-                CLIPrinter.println("Nessun risultato.");
+                CLIPrinter.printMessage("Nessun risultato.\n");
                 return;
             }
 
@@ -36,7 +36,7 @@ public class TourListCLIController extends NavigatorCLIController {
                 String price = formatPrice(t.getPrice());
                 String guide = safe(t.getGuideName());
 
-                CLIPrinter.printf(
+                CLIPrinter.printMessage(String.format(
                         "%d) %s | %s | %s -> %s | %s | Guida: %s%n",
                         i + 1,
                         tourName,
@@ -45,10 +45,10 @@ public class TourListCLIController extends NavigatorCLIController {
                         ret,
                         price,
                         guide
-                );
+                ));
             }
 
-            CLIPrinter.println("0) Indietro");
+            CLIPrinter.printMessage("0) Indietro\n");
             int choice = readInt("Seleziona un tour: ", 0, max);
 
             if (choice == 0) {

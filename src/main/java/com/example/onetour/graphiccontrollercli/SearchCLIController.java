@@ -19,11 +19,12 @@ public class SearchCLIController extends NavigatorCLIController {
 
     public void start() {
         while (true) {
-            CLIPrinter.println();
-            CLIPrinter.println("=== RICERCA TOUR ===");
-            CLIPrinter.println("1) Cerca tour");
-            CLIPrinter.println("2) Le mie prenotazioni");
-            CLIPrinter.println("3) Logout");
+            CLIPrinter.printMessage("\n");
+            CLIPrinter.printMessage("=== RICERCA TOUR ===\n");
+            CLIPrinter.printMessage("1) Cerca tour\n");
+            CLIPrinter.printMessage("2) Le mie prenotazioni\n");
+            CLIPrinter.printMessage("3) Logout\n");
+
             int choice = readInt("Seleziona: ", 1, 3);
 
             switch (choice) {
@@ -32,7 +33,7 @@ public class SearchCLIController extends NavigatorCLIController {
                 case 3 -> {
                     return;
                 }
-                default -> CLIPrinter.println("Scelta non valida.");
+                default -> CLIPrinter.printMessage("Scelta non valida.\n");
             }
         }
     }
@@ -53,14 +54,14 @@ public class SearchCLIController extends NavigatorCLIController {
             List<TourBean> results = bookTourController.searchTours(sb);
 
             if (results == null || results.isEmpty()) {
-                CLIPrinter.println("Nessun tour trovato.");
+                CLIPrinter.printMessage("Nessun tour trovato.\n");
                 return;
             }
 
             new TourListCLIController(sessionID, results).start();
 
         } catch (Exception e) {
-            CLIPrinter.println("Errore durante la ricerca: " + e.getMessage());
+            CLIPrinter.printMessage("Errore durante la ricerca: " + e.getMessage() + "\n");
         }
     }
 
@@ -73,7 +74,7 @@ public class SearchCLIController extends NavigatorCLIController {
             try {
                 return LocalDate.parse(s);
             } catch (DateTimeParseException ex) {
-                CLIPrinter.println("Formato data non valido. Usa YYYY-MM-DD oppure invio per saltare.");
+                CLIPrinter.printMessage("Formato data non valido. Usa YYYY-MM-DD oppure invio per saltare.\n");
             }
         }
     }

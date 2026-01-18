@@ -17,26 +17,28 @@ public class MyBookingsCLIController extends NavigatorCLIController {
 
     public void start() {
         while (true) {
-            CLIPrinter.println();
-            CLIPrinter.println("=== PRENOTAZIONI ===");
+            CLIPrinter.printMessage("\n");
+            CLIPrinter.printMessage("=== PRENOTAZIONI ===\n");
 
             List<BookingBean> bookings;
             try {
                 bookings = bookTourController.getMyBookings(sessionId);
             } catch (Exception e) {
-                CLIPrinter.println("Errore nel recupero prenotazioni: " + e.getMessage());
-                CLIPrinter.println("0) Indietro");
+                CLIPrinter.printMessage(
+                        "Errore nel recupero prenotazioni: " + e.getMessage() + "\n"
+                );
+                CLIPrinter.printMessage("0) Indietro\n");
                 readInt("Seleziona: ", 0, 0);
                 return;
             }
 
             if (bookings == null || bookings.isEmpty()) {
-                CLIPrinter.println("Nessuna prenotazione trovata.");
+                CLIPrinter.printMessage("Nessuna prenotazione trovata.\n");
             } else {
                 for (int i = 0; i < bookings.size(); i++) {
                     BookingBean b = bookings.get(i);
 
-                    CLIPrinter.printf(
+                    CLIPrinter.printMessage(String.format(
                             "%d) %s | Ticket: %s | Guida: %s | Data: %s | Stato: %s%n",
                             i + 1,
                             safe(b.getTourName()),
@@ -44,13 +46,14 @@ public class MyBookingsCLIController extends NavigatorCLIController {
                             safe(b.getGuideName()),
                             safeDate(b.getBookingDate()),
                             safeState(b.getState())
-                    );
+                    ));
                 }
             }
 
-            CLIPrinter.println();
-            CLIPrinter.println("1) Aggiorna");
-            CLIPrinter.println("0) Indietro");
+            CLIPrinter.printMessage("\n");
+            CLIPrinter.printMessage("1) Aggiorna\n");
+            CLIPrinter.printMessage("0) Indietro\n");
+
             int choice = readInt("Seleziona: ", 0, 1);
             if (choice == 0) {
                 return;
