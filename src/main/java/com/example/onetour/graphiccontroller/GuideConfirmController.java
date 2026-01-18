@@ -43,7 +43,6 @@ public class GuideConfirmController {
     }
 
     private void setupColumns() {
-        // PENDING
         pTourCol.setCellValueFactory(cd -> new SimpleStringProperty(getTourLabel(cd.getValue())));
         pUserCol.setCellValueFactory(cd -> new SimpleStringProperty(getUserLabel(cd.getValue())));
         pDateCol.setCellValueFactory(cd -> new SimpleStringProperty(getDateLabel(cd.getValue())));
@@ -70,7 +69,6 @@ public class GuideConfirmController {
             }
         });
 
-        // HISTORY
         hTourCol.setCellValueFactory(cd -> new SimpleStringProperty(getTourLabel(cd.getValue())));
         hUserCol.setCellValueFactory(cd -> new SimpleStringProperty(getUserLabel(cd.getValue())));
         hDateCol.setCellValueFactory(cd -> new SimpleStringProperty(getDateLabel(cd.getValue())));

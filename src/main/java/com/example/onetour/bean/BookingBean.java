@@ -69,7 +69,6 @@ public class BookingBean implements Serializable {
     public String getTourName() { return tourName; }
     public void setTourName(String tourName) { this.tourName = tourName; }
 
-    // ✅ NEW
     public String getTourID() { return tourID; }
     public void setTourID(String tourID) { this.tourID = tourID; }
 }

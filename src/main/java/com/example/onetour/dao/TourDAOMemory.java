@@ -11,6 +11,11 @@ import java.util.List;
 
 public class TourDAOMemory extends TourDAO {
 
+    private static final String CITY_BARCELLONA = "Barcellona";
+    private static final String CITY_VIENNA = "Vienna";
+    private static final String CITY_PARIGI = "Parigi";
+    private static final String CITY_LONDRA = "Londra";
+
     private static final List<Tour> SEED = new ArrayList<>();
     private static boolean initialized = false;
 
@@ -46,25 +51,25 @@ public class TourDAOMemory extends TourDAO {
         // =========================
         // BARCELLONA (4 tour)
         // =========================
-        Tour b1 = new Tour("T_BCN_01", "Sagrada Familia & Modernismo", "Barcellona",
+        Tour b1 = new Tour("T_BCN_01", "Sagrada Familia & Modernismo", CITY_BARCELLONA,
                 LocalDate.of(2026, 2, 20), LocalDate.of(2026, 2, 22), 39.0
         );
         b1.setAttractions(List.of("Sagrada Familia", "Casa Batlló", "Passeig de Gràcia"));
         b1.setTouristGuide(g3);
 
-        Tour b2 = new Tour("T_BCN_02", "Gothic Quarter Walk", "Barcellona",
+        Tour b2 = new Tour("T_BCN_02", "Gothic Quarter Walk", CITY_BARCELLONA,
                 LocalDate.of(2026, 3, 5), LocalDate.of(2026, 3, 6), 22.0
         );
         b2.setAttractions(List.of("Barri Gòtic", "Cattedrale", "Plaça Reial"));
         b2.setTouristGuide(g3);
 
-        Tour b3 = new Tour("T_BCN_03", "Park Güell & Views", "Barcellona",
+        Tour b3 = new Tour("T_BCN_03", "Park Güell & Views", CITY_BARCELLONA,
                 LocalDate.of(2026, 3, 18), LocalDate.of(2026, 3, 19), 27.0
         );
         b3.setAttractions(List.of("Park Güell", "Bunkers del Carmel", "Gràcia"));
         b3.setTouristGuide(g3);
 
-        Tour b4 = new Tour("T_BCN_04", "Tapas & Seafront Evening", "Barcellona",
+        Tour b4 = new Tour("T_BCN_04", "Tapas & Seafront Evening", CITY_BARCELLONA,
                 LocalDate.of(2026, 4, 10), LocalDate.of(2026, 4, 11), 29.0
         );
         b4.setAttractions(List.of("La Barceloneta", "Port Vell", "Tapas tasting"));
@@ -73,25 +78,25 @@ public class TourDAOMemory extends TourDAO {
         // =========================
         // VIENNA (4 tour)
         // =========================
-        Tour v1 = new Tour("T_VIE_01", "Imperial Vienna: Schönbrunn", "Vienna",
+        Tour v1 = new Tour("T_VIE_01", "Imperial Vienna: Schönbrunn", CITY_VIENNA,
                 LocalDate.of(2026, 2, 25), LocalDate.of(2026, 2, 27), 45.0
         );
         v1.setAttractions(List.of("Schönbrunn", "Gloriette", "Giardini"));
         v1.setTouristGuide(g4);
 
-        Tour v2 = new Tour("T_VIE_02", "Historic Center & MuseumsQuartier", "Vienna",
+        Tour v2 = new Tour("T_VIE_02", "Historic Center & MuseumsQuartier", CITY_VIENNA,
                 LocalDate.of(2026, 3, 12), LocalDate.of(2026, 3, 13), 28.0
         );
         v2.setAttractions(List.of("Stephansdom", "Graben", "MuseumsQuartier"));
         v2.setTouristGuide(g4);
 
-        Tour v3 = new Tour("T_VIE_03", "Belvedere & Art Walk", "Vienna",
+        Tour v3 = new Tour("T_VIE_03", "Belvedere & Art Walk", CITY_VIENNA,
                 LocalDate.of(2026, 4, 2), LocalDate.of(2026, 4, 3), 32.0
         );
         v3.setAttractions(List.of("Belvedere", "Klimt area", "Palace gardens"));
         v3.setTouristGuide(g4);
 
-        Tour v4 = new Tour("T_VIE_04", "Prater Evening & Danube Canal", "Vienna",
+        Tour v4 = new Tour("T_VIE_04", "Prater Evening & Danube Canal", CITY_VIENNA,
                 LocalDate.of(2026, 4, 18), LocalDate.of(2026, 4, 19), 26.0
         );
         v4.setAttractions(List.of("Prater", "Riesenrad", "Danube Canal"));
@@ -100,25 +105,25 @@ public class TourDAOMemory extends TourDAO {
         // =========================
         // PARIGI (4 tour)
         // =========================
-        Tour p1 = new Tour("T_PAR_01", "Louvre Essentials", "Parigi",
+        Tour p1 = new Tour("T_PAR_01", "Louvre Essentials", CITY_PARIGI,
                 LocalDate.of(2026, 2, 8), LocalDate.of(2026, 2, 9), 34.0
         );
         p1.setAttractions(List.of("Louvre", "Tuileries", "Pont des Arts"));
         p1.setTouristGuide(g2);
 
-        Tour p2 = new Tour("T_PAR_02", "Eiffel & Seine Cruise", "Parigi",
+        Tour p2 = new Tour("T_PAR_02", "Eiffel & Seine Cruise", CITY_PARIGI,
                 LocalDate.of(2026, 3, 22), LocalDate.of(2026, 3, 23), 38.0
         );
         p2.setAttractions(List.of("Torre Eiffel", "Champ de Mars", "Crociera Senna"));
         p2.setTouristGuide(g2);
 
-        Tour p3 = new Tour("T_PAR_03", "Montmartre & Sacré-Cœur", "Parigi",
+        Tour p3 = new Tour("T_PAR_03", "Montmartre & Sacré-Cœur", CITY_PARIGI,
                 LocalDate.of(2026, 4, 6), LocalDate.of(2026, 4, 7), 25.0
         );
         p3.setAttractions(List.of("Montmartre", "Sacré-Cœur", "Place du Tertre"));
         p3.setTouristGuide(g2);
 
-        Tour p4 = new Tour("T_PAR_04", "Île de la Cité & Latin Quarter", "Parigi",
+        Tour p4 = new Tour("T_PAR_04", "Île de la Cité & Latin Quarter", CITY_PARIGI,
                 LocalDate.of(2026, 5, 2), LocalDate.of(2026, 5, 3), 27.0
         );
         p4.setAttractions(List.of("Notre-Dame area", "Sainte-Chapelle", "Quartiere Latino"));
@@ -127,25 +132,25 @@ public class TourDAOMemory extends TourDAO {
         // =========================
         // LONDRA (4 tour)
         // =========================
-        Tour l1 = new Tour("T_LON_01", "Westminster Highlights", "Londra",
+        Tour l1 = new Tour("T_LON_01", "Westminster Highlights", CITY_LONDRA,
                 LocalDate.of(2026, 2, 14), LocalDate.of(2026, 2, 15), 29.0
         );
         l1.setAttractions(List.of("Westminster", "Big Ben", "Buckingham Palace"));
         l1.setTouristGuide(g1);
 
-        Tour l2 = new Tour("T_LON_02", "British Museum & Bloomsbury", "Londra",
+        Tour l2 = new Tour("T_LON_02", "British Museum & Bloomsbury", CITY_LONDRA,
                 LocalDate.of(2026, 3, 8), LocalDate.of(2026, 3, 9), 24.0
         );
         l2.setAttractions(List.of("British Museum", "Bloomsbury", "Covent Garden"));
         l2.setTouristGuide(g1);
 
-        Tour l3 = new Tour("T_LON_03", "Tower Bridge & City Walk", "Londra",
+        Tour l3 = new Tour("T_LON_03", "Tower Bridge & City Walk", CITY_LONDRA,
                 LocalDate.of(2026, 4, 12), LocalDate.of(2026, 4, 13), 31.0
         );
         l3.setAttractions(List.of("Tower Bridge", "Tower of London", "St Paul’s area"));
         l3.setTouristGuide(g1);
 
-        Tour l4 = new Tour("T_LON_04", "Camden & Street Food", "Londra",
+        Tour l4 = new Tour("T_LON_04", "Camden & Street Food", CITY_LONDRA,
                 LocalDate.of(2026, 5, 10), LocalDate.of(2026, 5, 11), 23.0
         );
         l4.setAttractions(List.of("Camden Market", "Regent’s Canal", "Street food"));

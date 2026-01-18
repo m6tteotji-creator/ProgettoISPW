@@ -6,7 +6,7 @@ public class UserAccount {
 
     private String userID;
     private String name;
-    private String surname;     // NEW
+    private String surname;
     private String userEmail;
     private RoleEnum role;
 

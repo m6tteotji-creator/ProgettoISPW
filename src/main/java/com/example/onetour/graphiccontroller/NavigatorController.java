@@ -1,5 +1,6 @@
 package com.example.onetour.graphiccontroller;
 
+import com.example.onetour.enumeration.RoleEnum;
 import com.example.onetour.model.Session;
 import com.example.onetour.model.UserAccount;
 import com.example.onetour.sessionmanagement.SessionManagerSingleton;
@@ -20,13 +21,16 @@ public class NavigatorController {
 
     private static final Logger logger = Logger.getLogger(NavigatorController.class.getName());
 
+    private static final String PAGE_LANDING = "/fxml/pages/page1_landing.fxml";
+    private static final String PAGE_LOGIN = "/fxml/pages/page2_login.fxml";
+    private static final String PAGE_SIGNUP = "/fxml/pages/page3_signup.fxml";
+    private static final String PAGE_BOOKINGS = "/fxml/pages/page7_bookings.fxml";
+
     @FXML private HBox headerBar;
     @FXML private AnchorPane contentPane;
 
     @FXML private Button loginButton;
     @FXML private Button bookingsButton;
-
-    // User area (icon + card)
     @FXML private Button userButton;
     @FXML private VBox userCard;
     @FXML private Label helloLabel;
@@ -36,7 +40,7 @@ public class NavigatorController {
     public void initialize() {
         NavigatorBase.setNavigatorController(this);
 
-        setCenter("/fxml/pages/page1_landing.fxml");
+        setCenter(PAGE_LANDING);
         refreshHeader();
     }
 
@@ -55,16 +59,9 @@ public class NavigatorController {
             AnchorPane.setBottomAnchor(page, 0.0);
             AnchorPane.setLeftAnchor(page, 0.0);
             AnchorPane.setRightAnchor(page, 0.0);
-            boolean hideHeader =
-                    "/fxml/pages/page2_login.fxml".equals(fxmlPath) ||
-                            "/fxml/pages/page3_signup.fxml".equals(fxmlPath);
 
-            setHeaderVisible(!hideHeader);
-            if (userCard != null) {
-                userCard.setVisible(false);
-                userCard.setManaged(false);
-            }
-
+            setHeaderVisible(!shouldHideHeader(fxmlPath));
+            hideUserCard();
             refreshHeader();
 
         } catch (IOException e) {
@@ -74,68 +71,83 @@ public class NavigatorController {
         }
     }
 
+    private boolean shouldHideHeader(String fxmlPath) {
+        return PAGE_LOGIN.equals(fxmlPath) || PAGE_SIGNUP.equals(fxmlPath);
+    }
+
+    private void hideUserCard() {
+        if (userCard == null) return;
+        userCard.setVisible(false);
+        userCard.setManaged(false);
+    }
+
     public void refreshHeader() {
-        if (headerBar != null && (!headerBar.isVisible() || !headerBar.isManaged())) {
+        if (!isHeaderActive()) {
             return;
         }
 
         Session session = SessionManagerSingleton.getInstance().getCurrentSession();
+        UserAccount user = (session != null) ? session.getUser() : null;
 
-        // NOT LOGGED
-        if (session == null || session.getUser() == null) {
-            if (loginButton != null) {
-                loginButton.setVisible(true);
-                loginButton.setManaged(true);
-            }
-
-            if (userButton != null) {
-                userButton.setVisible(false);
-                userButton.setManaged(false);
-                userButton.setText(""); // pulizia
-            }
-
-            if (userCard != null) {
-                userCard.setVisible(false);
-                userCard.setManaged(false);
-            }
-
-            if (bookingsButton != null) {
-                bookingsButton.setVisible(false);
-                bookingsButton.setManaged(false);
-            }
+        if (user == null) {
+            applyNotLoggedState();
             return;
         }
 
-        // LOGGED
-        UserAccount user = session.getUser();
+        applyLoggedState(user);
+    }
 
-        if (loginButton != null) {
-            loginButton.setVisible(false);
-            loginButton.setManaged(false);
-        }
+    private boolean isHeaderActive() {
+        return headerBar == null || (headerBar.isVisible() && headerBar.isManaged());
+    }
 
+    private void applyNotLoggedState() {
+        setNodeVisible(loginButton, true);
+        setNodeVisible(userButton, false);
+        clearUserButtonText();
+        setNodeVisible(userCard, false);
+        setNodeVisible(bookingsButton, false);
+    }
+
+    private void applyLoggedState(UserAccount user) {
+        setNodeVisible(loginButton, false);
+        setNodeVisible(userButton, true);
+
+        boolean isGuide = user.getRole() == RoleEnum.TOURISTGUIDE;
+        setNodeVisible(bookingsButton, !isGuide);
+
+        String fullName = safeFullName(user);
+        String email = safeEmail(user);
+
+        setUserTexts(fullName, email);
+    }
+
+    private void setNodeVisible(javafx.scene.Node node, boolean visible) {
+        if (node == null) return;
+        node.setVisible(visible);
+        node.setManaged(visible);
+    }
+
+    private void clearUserButtonText() {
         if (userButton != null) {
-            userButton.setVisible(true);
-            userButton.setManaged(true);
+            userButton.setText("");
         }
+    }
 
-        boolean isGuide = (user.getRole() == com.example.onetour.enumeration.RoleEnum.TOURISTGUIDE);
-        if (bookingsButton != null) {
-            bookingsButton.setVisible(!isGuide);
-            bookingsButton.setManaged(!isGuide);
-        }
-
+    private String safeFullName(UserAccount user) {
         String fullName = user.getFullName();
-        if (fullName == null || fullName.isBlank()) fullName = "User";
+        return (fullName == null || fullName.isBlank()) ? "User" : fullName;
+    }
 
-        String email = (user.getUserEmail() != null && !user.getUserEmail().isBlank())
-                ? user.getUserEmail()
-                : "-";
+    private String safeEmail(UserAccount user) {
+        String email = user.getUserEmail();
+        return (email == null || email.isBlank()) ? "-" : email;
+    }
 
+    private void setUserTexts(String fullName, String email) {
         if (userButton != null) {
             userButton.setText(fullName);
         }
-
         if (helloLabel != null) {
             helloLabel.setText("Hello, " + fullName);
         }
@@ -154,12 +166,12 @@ public class NavigatorController {
 
     @FXML
     private void onLoginHeaderClicked() {
-        NavigatorBase.goTo("/fxml/pages/page2_login.fxml");
+        NavigatorBase.goTo(PAGE_LOGIN);
     }
 
     @FXML
     private void onBookingsClicked() {
-        NavigatorBase.goTo("/fxml/pages/page7_bookings.fxml");
+        NavigatorBase.goTo(PAGE_BOOKINGS);
     }
 
     @FXML
@@ -170,12 +182,8 @@ public class NavigatorController {
         }
         SessionManagerSingleton.getInstance().clearCurrentSession();
 
-        if (userCard != null) {
-            userCard.setVisible(false);
-            userCard.setManaged(false);
-        }
-
+        hideUserCard();
         refreshHeader();
-        setCenter("/fxml/pages/page2_login.fxml");
+        setCenter(PAGE_LOGIN);
     }
 }

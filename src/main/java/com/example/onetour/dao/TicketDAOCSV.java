@@ -98,11 +98,10 @@ public class TicketDAOCSV extends TicketDAO {
 
         try {
             List<Ticket> res = readFiltered(row -> {
-                if (row.length < 5) return false;
-
                 String st = row[IDX_STATE];
-                if (!TicketState.PENDING.name().equals(st)) return false;
-
+                if (!TicketState.PENDING.name().equals(st)) {
+                    return false;
+                }
                 return isRowMatchingGuide(row, guideEmail);
             });
 
@@ -123,10 +122,7 @@ public class TicketDAOCSV extends TicketDAO {
         }
 
         try {
-            List<Ticket> res = readFiltered(row -> {
-                if (row.length < 5) return false;
-                return isRowMatchingGuide(row, guideEmail);
-            });
+            List<Ticket> res = readFiltered(row -> isRowMatchingGuide(row, guideEmail));
 
             if (res.isEmpty()) {
                 throw new TicketNotFoundException("No tickets for guide: " + guideEmail);
@@ -180,7 +176,8 @@ public class TicketDAOCSV extends TicketDAO {
             return tour.getTouristGuide().getEmail().equalsIgnoreCase(guideEmail);
 
         } catch (SQLException | TourNotFoundException e) {
-            logger.log(Level.WARNING, e, () -> "Skipping row: cannot rebuild Tour for tour_id=" + tourId);
+            logger.log(Level.WARNING, e,
+                    () -> "Skipping row: cannot rebuild Tour for tour_id=" + tourId);
             return false;
         }
     }
@@ -195,7 +192,9 @@ public class TicketDAOCSV extends TicketDAO {
             throw new IllegalArgumentException("bookingDate missing");
         if (ticket.getState() == null)
             throw new IllegalArgumentException("state missing");
-        if (ticket.getTour() == null || ticket.getTour().getTourID() == null || ticket.getTour().getTourID().isBlank())
+        if (ticket.getTour() == null
+                || ticket.getTour().getTourID() == null
+                || ticket.getTour().getTourID().isBlank())
             throw new IllegalArgumentException("tourID missing");
     }
 
@@ -203,7 +202,9 @@ public class TicketDAOCSV extends TicketDAO {
         try (CSVReader r = new CSVReader(new BufferedReader(new FileReader(fd)))) {
             String[] row;
             while ((row = r.readNext()) != null) {
-                if (sameTicketId(row, ticketID)) return true;
+                if (sameTicketId(row, ticketID)) {
+                    return true;
+                }
             }
             return false;
         }
@@ -223,28 +224,35 @@ public class TicketDAOCSV extends TicketDAO {
         }
     }
 
-    /**
-     * Reads rows matching a predicate and maps them to Ticket.
-     * If a row references a Tour that no longer exists, it is skipped (no crash).
-     */
-    private List<Ticket> readFiltered(RowPredicate predicate) throws IOException, CsvValidationException {
+    private List<Ticket> readFiltered(RowPredicate predicate)
+            throws IOException, CsvValidationException {
+
         List<Ticket> out = new ArrayList<>();
+
         try (CSVReader r = new CSVReader(new BufferedReader(new FileReader(fd)))) {
             String[] row;
+
             while ((row = r.readNext()) != null) {
-                if (row.length < 5) continue;
-                if (!predicate.test(row)) continue;
+                if (!isRowEligible(row, predicate)) {
+                    continue;
+                }
 
                 try {
                     out.add(mapRowToTicket(row));
                 } catch (CSVPersistenceException ex) {
-                    // CSV can contain old tickets referencing removed tours (e.g., T001 after seed change).
-                    // We skip the row instead of crashing the whole flow.
-                    logger.log(Level.WARNING, () -> ex.getMessage());
+                    logger.log(Level.WARNING, ex::getMessage);
                 }
             }
         }
+
         return out;
+    }
+
+    private boolean isRowEligible(String[] row, RowPredicate predicate) {
+        return row != null
+                && row.length >= 5
+                && predicate != null
+                && predicate.test(row);
     }
 
     private List<String[]> readAllRows() throws IOException, CsvValidationException {
@@ -252,7 +260,9 @@ public class TicketDAOCSV extends TicketDAO {
         try (CSVReader r = new CSVReader(new BufferedReader(new FileReader(fd)))) {
             String[] row;
             while ((row = r.readNext()) != null) {
-                if (row.length >= 5) rows.add(row);
+                if (row.length >= 5) {
+                    rows.add(row);
+                }
             }
         }
         return rows;
@@ -276,7 +286,8 @@ public class TicketDAOCSV extends TicketDAO {
         try {
             tour = tourDAO.retrieveTourFromId(tourID);
         } catch (SQLException | TourNotFoundException e) {
-            throw new CSVPersistenceException("Cannot rebuild Tour from id in CSV: " + tourID, e);
+            throw new CSVPersistenceException(
+                    "Cannot rebuild Tour from id in CSV: " + tourID, e);
         }
 
         Ticket t = new Ticket(id, date, st, userEmail);
@@ -294,7 +305,8 @@ public class TicketDAOCSV extends TicketDAO {
             case "MEMORY", "DEMO" -> new TourDAOMemory();
             case "JDBC", "MYSQL" -> new TourDAOJDBC();
             default -> {
-                logger.log(Level.WARNING, () -> "Unsupported tour.persistence=" + persistence + " -> fallback MEMORY");
+                logger.log(Level.WARNING,
+                        () -> "Unsupported tour.persistence=" + persistence + " -> fallback MEMORY");
                 yield new TourDAOMemory();
             }
         };

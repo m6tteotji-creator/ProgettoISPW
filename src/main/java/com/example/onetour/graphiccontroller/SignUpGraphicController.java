@@ -35,7 +35,6 @@ public class SignUpGraphicController {
         String email = safe(emailField.getText()).toLowerCase();
         String password = passwordField.getText() == null ? "" : passwordField.getText();
 
-        // Validazione minima
         if (name.isBlank() || surname.isBlank() || email.isBlank() || password.isBlank()) {
             errorLabel.setText("Fill in all fields.");
             return;
