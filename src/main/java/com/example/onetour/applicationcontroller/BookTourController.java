@@ -197,6 +197,17 @@ public class BookTourController {
         TicketDAO ticketDAO = buildTicketDAO();
         ticketDAO.modifyState(emailBean.getTicketID(), emailBean.getDecision());
 
+        emailBean.setGuideEmail(actor.getUserEmail());
+
+        Ticket t = ticketDAO.retrieveByGuide(actor.getUserEmail()).stream()
+                .filter(x -> emailBean.getTicketID().equals(x.getTicketID()))
+                .findFirst()
+                .orElseThrow(() -> new TicketNotFoundException("Ticket not found: " + emailBean.getTicketID()));
+
+        emailBean.setUserEmail(t.getUserEmail());
+        emailBean.setTourID(t.getTour().getTourID());
+
+
         EmailNotificationBoundary boundary = new EmailNotificationBoundary();
         boundary.sendNotification(emailBean);
     }

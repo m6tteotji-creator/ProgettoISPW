@@ -15,6 +15,9 @@
 
         <!-- JavaFX -->
         <javafx.version>21.0.2</javafx.version>
+
+        <!-- JUnit 5 -->
+        <junit.version>5.10.2</junit.version>
     </properties>
 
     <dependencies>
@@ -44,6 +47,14 @@
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
         </dependency>
+
+        <!-- JUnit 5 (tests) -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -66,6 +77,13 @@
                 <configuration>
                     <mainClass>com.example.onetour.MainFX</mainClass>
                 </configuration>
+            </plugin>
+
+            <!-- Needed to run JUnit 5 with mvn test -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
             </plugin>
         </plugins>
     </build>

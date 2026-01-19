@@ -14,30 +14,31 @@ public class TicketDAOFactorySingleton {
         return Helper.INSTANCE;
     }
 
+
     public TicketDAO createTicketDAO() {
         try {
             AppConfig cfg = AppConfig.getInstance();
 
-            String mode = cfg.get("app.mode", "DEMO");
+            // app.mode: DEMO | FULL
+            String mode = cfg.get("app.mode", "DEMO").trim();
 
-            String persistence = cfg.get("ticket.persistence", null);
-            if (persistence == null || persistence.isBlank()) {
-                if ("DEMO".equalsIgnoreCase(mode)) {
-                    persistence = "MEMORY";
-                } else {
-                    persistence = "MYSQL";
-                }
+            // DEMO: force memory ONLY
+            if ("DEMO".equalsIgnoreCase(mode)) {
+                return new TicketDAOMemory();
             }
 
+            // FULL: choose persistence implementation
+            String persistence = cfg.get("ticket.persistence", "CSV").trim();
+
             return switch (persistence.toUpperCase()) {
-                case "MYSQL" -> new TicketDAOJDBC();
+                case "JDBC" -> new TicketDAOJDBC();
                 case "CSV" -> new TicketDAOCSV();
                 case "MEMORY" -> new TicketDAOMemory();
                 default -> throw new IllegalArgumentException("Unknown ticket.persistence: " + persistence);
             };
 
-        } catch (RuntimeException e) {
-            throw e;
+        } catch (RuntimeException re) {
+            throw re;
         } catch (Exception e) {
             throw new FactoryConfigurationException("Unable to create TicketDAO", e);
         }
