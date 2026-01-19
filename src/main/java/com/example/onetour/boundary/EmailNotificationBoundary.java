@@ -14,8 +14,7 @@ import java.util.logging.Logger;
 
 public class EmailNotificationBoundary {
 
-    private static final Logger logger =
-            Logger.getLogger(EmailNotificationBoundary.class.getName());
+    private static final Logger logger = Logger.getLogger(EmailNotificationBoundary.class.getName());
 
     private static final String DATA_DIR =
             System.getProperty("user.home") + File.separator + "onetour-data";
@@ -24,7 +23,7 @@ public class EmailNotificationBoundary {
 
     public void sendNotification(EmailBean emailBean) {
         if (emailBean == null) {
-            logger.log(Level.WARNING, "EmailBean is null");
+            logger.warning("EmailBean is null");
             return;
         }
 
@@ -32,38 +31,52 @@ public class EmailNotificationBoundary {
 
         String mode = AppConfig.getInstance().get("app.mode", "DEMO").trim();
         if ("DEMO".equalsIgnoreCase(mode)) {
-            logger.info("[DEMO EMAIL] TO=" + emailBean.getUserEmail()
-                    + " FROM=" + emailBean.getGuideEmail()
-                    + " TOUR_ID=" + emailBean.getTourID()
-                    + " DECISION=" + decisionText);
+            logger.log(
+                    Level.INFO,
+                    "[DEMO EMAIL] TO={0} FROM={1} TOUR_ID={2} DECISION={3}",
+                    new Object[] {
+                            emailBean.getUserEmail(),
+                            emailBean.getGuideEmail(),
+                            emailBean.getTourID(),
+                            decisionText
+                    }
+            );
             return;
         }
 
-        try {
-            File dir = new File(DATA_DIR);
-            if (!dir.exists() && !dir.mkdirs()) {
-                logger.log(Level.SEVERE, "Unable to create data directory: " + DATA_DIR);
-                return;
-            }
+        File dir = new File(DATA_DIR);
+        if (!dir.exists() && !dir.mkdirs()) {
+            logger.log(Level.SEVERE, "Unable to create data directory: {0}", DATA_DIR);
+            return;
+        }
 
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, true))) {
-                writer.write("=====================================\n");
-                writer.write("DATE: " + LocalDateTime.now() + "\n");
-                writer.write("FROM (Guide): " + emailBean.getGuideEmail() + "\n");
-                writer.write("TO (User): " + emailBean.getUserEmail() + "\n");
-                writer.write("TOUR ID: " + emailBean.getTourID() + "\n");
-                writer.write("-------------------------------------\n");
-                writer.write("Your booking request has been " + decisionText + ".\n");
-                writer.write("=====================================\n\n");
-            }
+        String message = String.format(
+                "=====================================%n" +
+                        "DATE: %s%n" +
+                        "FROM (Guide): %s%n" +
+                        "TO (User): %s%n" +
+                        "TOUR ID: %s%n" +
+                        "-------------------------------------%n" +
+                        "Your booking request has been %s.%n" +
+                        "=====================================%n%n",
+                LocalDateTime.now(),
+                emailBean.getGuideEmail(),
+                emailBean.getUserEmail(),
+                emailBean.getTourID(),
+                decisionText
+        );
 
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, true))) {
+            writer.write(message);
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Error writing email notification", e);
         }
     }
 
     private String mapDecision(TicketState decision) {
-        if (decision == null) return "processed";
+        if (decision == null) {
+            return "processed";
+        }
 
         return switch (decision) {
             case CONFIRMED -> "ACCEPTED";
