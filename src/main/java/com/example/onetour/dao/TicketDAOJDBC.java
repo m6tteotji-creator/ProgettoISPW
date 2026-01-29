@@ -20,7 +20,8 @@ import java.util.List;
 
 public class TicketDAOJDBC extends TicketDAO {
 
-    private final TourDAO tourDAO = new TourDAOJDBC();
+    // Fixed source of tours: MEMORY only
+    private final TourDAO tourDAO = new TourDAOCatalog();
 
     @Override
     public void create(Ticket ticket) throws DuplicateTicketException {
@@ -71,7 +72,6 @@ public class TicketDAOJDBC extends TicketDAO {
             }
 
         } catch (SQLException e) {
-            // FIX: Uso eccezione specifica
             throw new DAOException("DB error while retrieving tickets by user", e);
         }
 
@@ -87,22 +87,25 @@ public class TicketDAOJDBC extends TicketDAO {
             throw new IllegalArgumentException("guideEmail missing");
         }
 
+        // 1) Read all pending tickets from DB
         List<Ticket> out = new ArrayList<>();
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(Queries.SELECT_PENDING_TICKETS_BY_GUIDE_EMAIL)) {
+             PreparedStatement ps = conn.prepareStatement(Queries.SELECT_TICKETS_BY_STATE)) {
 
-            ps.setString(1, guideEmail);
-            ps.setString(2, TicketState.PENDING.name());
+            ps.setString(1, TicketState.PENDING.name());
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    out.add(mapRow(rs));
+                    Ticket t = mapRow(rs);
+                    if (isTicketMatchingGuide(t, guideEmail)) {
+                        out.add(t);
+                    }
                 }
             }
 
         } catch (SQLException e) {
-            throw new DAOException("DB error while retrieving pending tickets by guide", e);
+            throw new DAOException("DB error while retrieving pending tickets", e);
         }
 
         if (out.isEmpty()) {
@@ -117,22 +120,22 @@ public class TicketDAOJDBC extends TicketDAO {
             throw new IllegalArgumentException("guideEmail missing");
         }
 
+        // Read all tickets, then filter by guide in-memory
         List<Ticket> out = new ArrayList<>();
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(Queries.SELECT_TICKETS_BY_GUIDE_EMAIL)) {
+             PreparedStatement ps = conn.prepareStatement(Queries.SELECT_ALL_TICKETS);
+             ResultSet rs = ps.executeQuery()) {
 
-            ps.setString(1, guideEmail);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    out.add(mapRow(rs));
+            while (rs.next()) {
+                Ticket t = mapRow(rs);
+                if (isTicketMatchingGuide(t, guideEmail)) {
+                    out.add(t);
                 }
             }
 
         } catch (SQLException e) {
-            // FIX: Uso eccezione specifica
-            throw new DAOException("DB error while retrieving tickets by guide", e);
+            throw new DAOException("DB error while retrieving tickets", e);
         }
 
         if (out.isEmpty()) {
@@ -166,6 +169,16 @@ public class TicketDAOJDBC extends TicketDAO {
         }
     }
 
+    private boolean isTicketMatchingGuide(Ticket t, String guideEmail) {
+        if (t == null || t.getTour() == null) return false;
+        if (guideEmail == null || guideEmail.isBlank()) return false;
+
+        Tour tour = t.getTour();
+        if (tour.getTouristGuide() == null) return false;
+        String gEmail = tour.getTouristGuide().getEmail();
+        return gEmail != null && gEmail.equalsIgnoreCase(guideEmail);
+    }
+
     private Ticket mapRow(ResultSet rs) throws SQLException {
         String ticketID = rs.getString("ticket_id");
         LocalDate bookingDate = rs.getDate("booking_date").toLocalDate();
@@ -179,6 +192,7 @@ public class TicketDAOJDBC extends TicketDAO {
             Tour fullTour = tourDAO.retrieveTourFromId(tourID);
             t.setTour(fullTour);
         } catch (TourNotFoundException e) {
+            // Fallback: tour not found in memory seed
             Tour minimal = new Tour(tourID, "", "", bookingDate, bookingDate, 0.0);
             t.setTour(minimal);
         }
@@ -189,17 +203,23 @@ public class TicketDAOJDBC extends TicketDAO {
     private void validateTicketForCreate(Ticket ticket) {
         if (ticket == null) throw new IllegalArgumentException("Ticket is null");
         if (ticket.getTour() == null) throw new IllegalArgumentException("Ticket tour is null");
-        if (ticket.getTicketID() == null || ticket.getTicketID().isBlank()) throw new IllegalArgumentException("ticket_id missing");
-        if (ticket.getUserEmail() == null || ticket.getUserEmail().isBlank()) throw new IllegalArgumentException("user_email missing");
-        if (ticket.getTour().getTourID() == null || ticket.getTour().getTourID().isBlank()) throw new IllegalArgumentException("tour_id missing");
-        if (ticket.getBookingDate() == null) throw new IllegalArgumentException("booking_date missing");
-        if (ticket.getState() == null) throw new IllegalArgumentException("state missing");
+        if (ticket.getTicketID() == null || ticket.getTicketID().isBlank())
+            throw new IllegalArgumentException("ticket_id missing");
+        if (ticket.getUserEmail() == null || ticket.getUserEmail().isBlank())
+            throw new IllegalArgumentException("user_email missing");
+        if (ticket.getTour().getTourID() == null || ticket.getTour().getTourID().isBlank())
+            throw new IllegalArgumentException("tour_id missing");
+        if (ticket.getBookingDate() == null)
+            throw new IllegalArgumentException("booking_date missing");
+        if (ticket.getState() == null)
+            throw new IllegalArgumentException("state missing");
     }
 
     public static class DAOException extends RuntimeException {
         public DAOException(String message) {
             super(message);
         }
+
         public DAOException(String message, Throwable cause) {
             super(message, cause);
         }

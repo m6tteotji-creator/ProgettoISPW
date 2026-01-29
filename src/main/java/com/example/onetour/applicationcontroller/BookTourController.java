@@ -5,12 +5,10 @@ import com.example.onetour.bean.EmailBean;
 import com.example.onetour.bean.SearchBean;
 import com.example.onetour.bean.TourBean;
 import com.example.onetour.boundary.EmailNotificationBoundary;
-import com.example.onetour.config.AppConfig;
 import com.example.onetour.dao.TicketDAO;
 import com.example.onetour.dao.TicketDAOFactorySingleton;
 import com.example.onetour.dao.TourDAO;
-import com.example.onetour.dao.TourDAOJDBC;
-import com.example.onetour.dao.TourDAOMemory;
+import com.example.onetour.dao.TourDAOCatalog;
 import com.example.onetour.enumeration.RoleEnum;
 import com.example.onetour.enumeration.TicketState;
 import com.example.onetour.exception.DuplicateTicketException;
@@ -22,11 +20,12 @@ import com.example.onetour.model.Tour;
 import com.example.onetour.model.UserAccount;
 import com.example.onetour.sessionmanagement.SessionManagerSingleton;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BookTourController {
+
+    private static final TourDAO tourDAO = new TourDAOCatalog();
 
     public List<TourBean> searchTours(SearchBean searchBean)
             throws InvalidFormatException, TourNotFoundException {
@@ -37,17 +36,11 @@ public class BookTourController {
         String sessionID = searchBean.getSessionID();
         checkSession(sessionID);
 
-        TourDAO tourDAO = buildTourDAO();
-        final List<Tour> tours;
-        try {
-            tours = tourDAO.findTours(
-                    searchBean.getCityName(),
-                    searchBean.getDepartureDate(),
-                    searchBean.getReturnDate()
-            );
-        } catch (SQLException e) {
-            throw new InvalidFormatException("Persistence error while searching tours", e);
-        }
+        final List<Tour> tours = tourDAO.findTours(
+                searchBean.getCityName(),
+                searchBean.getDepartureDate(),
+                searchBean.getReturnDate()
+        );
 
         SessionManagerSingleton.getInstance().getSession(sessionID).setLastTourList(tours);
 
@@ -72,14 +65,7 @@ public class BookTourController {
             throw new InvalidFormatException("Invalid tour");
         }
 
-        TourDAO tourDAO = buildTourDAO();
-        final Tour tour;
-        try {
-            tour = tourDAO.retrieveTourFromId(tourBeanIn.getTourID());
-        } catch (SQLException e) {
-            throw new InvalidFormatException("Persistence error while retrieving tour", e);
-        }
-
+        final Tour tour = tourDAO.retrieveTourFromId(tourBeanIn.getTourID());
         if (tour == null) throw new TourNotFoundException("Tour not found");
 
         SessionManagerSingleton.getInstance().getSession(sessionID).setActualTour(tour);
@@ -207,7 +193,6 @@ public class BookTourController {
         emailBean.setUserEmail(t.getUserEmail());
         emailBean.setTourID(t.getTour().getTourID());
 
-
         EmailNotificationBoundary boundary = new EmailNotificationBoundary();
         boundary.sendNotification(emailBean);
     }
@@ -248,13 +233,10 @@ public class BookTourController {
     }
 
     private Tour loadTourById(String tourId) throws InvalidFormatException {
-        TourDAO tourDAO = buildTourDAO();
         try {
             Tour t = tourDAO.retrieveTourFromId(tourId);
             if (t == null) throw new InvalidFormatException("Tour not found");
             return t;
-        } catch (SQLException e) {
-            throw new InvalidFormatException("Persistence error while retrieving tour", e);
         } catch (TourNotFoundException e) {
             throw new InvalidFormatException("Tour not found", e);
         }
@@ -309,16 +291,6 @@ public class BookTourController {
         } catch (Exception e) {
             throw new InvalidFormatException("Persistence configuration error (ticket DAO)", e);
         }
-    }
-
-    private TourDAO buildTourDAO() {
-        String persistence = AppConfig.getInstance().get("tour.persistence", "MEMORY").trim().toUpperCase();
-
-        return switch (persistence) {
-            case "MYSQL", "JDBC" -> new TourDAOJDBC();
-            case "MEMORY", "DEMO" -> new TourDAOMemory();
-            default -> throw new IllegalStateException("Unsupported tour.persistence: " + persistence);
-        };
     }
 
     private static void checkSession(String sessionID) throws InvalidFormatException {

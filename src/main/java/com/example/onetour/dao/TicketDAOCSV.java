@@ -1,6 +1,5 @@
 package com.example.onetour.dao;
 
-import com.example.onetour.config.AppConfig;
 import com.example.onetour.enumeration.TicketState;
 import com.example.onetour.exception.DuplicateTicketException;
 import com.example.onetour.exception.TicketNotFoundException;
@@ -14,7 +13,6 @@ import com.opencsv.exceptions.CsvValidationException;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +34,9 @@ public class TicketDAOCSV extends TicketDAO {
             Path.of(System.getProperty("user.home"), "onetour-data", "tickets.csv");
 
     private final File fd;
-    private final TourDAO tourDAO;
+
+    // Fixed source of tours: MEMORY only
+    private final TourDAO tourDAO = new TourDAOCatalog();
 
     public TicketDAOCSV() {
         try {
@@ -49,8 +49,6 @@ public class TicketDAOCSV extends TicketDAO {
                     throw new IOException("Failed to create CSV file: " + fd.getAbsolutePath());
                 }
             }
-
-            this.tourDAO = buildTourDAO();
 
         } catch (IOException e) {
             throw new CSVPersistenceException("Cannot initialize TicketDAOCSV: " + CSV_PATH, e);
@@ -175,7 +173,7 @@ public class TicketDAOCSV extends TicketDAO {
             if (tour.getTouristGuide() == null || tour.getTouristGuide().getEmail() == null) return false;
             return tour.getTouristGuide().getEmail().equalsIgnoreCase(guideEmail);
 
-        } catch (SQLException | TourNotFoundException e) {
+        } catch (TourNotFoundException e) {
             logger.log(Level.WARNING, e,
                     () -> "Skipping row: cannot rebuild Tour for tour_id=" + tourId);
             return false;
@@ -285,7 +283,7 @@ public class TicketDAOCSV extends TicketDAO {
         Tour tour;
         try {
             tour = tourDAO.retrieveTourFromId(tourID);
-        } catch (SQLException | TourNotFoundException e) {
+        } catch (TourNotFoundException e) {
             throw new CSVPersistenceException(
                     "Cannot rebuild Tour from id in CSV: " + tourID, e);
         }
@@ -293,23 +291,6 @@ public class TicketDAOCSV extends TicketDAO {
         Ticket t = new Ticket(id, date, st, userEmail);
         t.setTour(tour);
         return t;
-    }
-
-    private TourDAO buildTourDAO() {
-        String persistence = AppConfig.getInstance()
-                .get("tour.persistence", "MEMORY")
-                .trim()
-                .toUpperCase();
-
-        return switch (persistence) {
-            case "MEMORY", "DEMO" -> new TourDAOMemory();
-            case "JDBC", "MYSQL" -> new TourDAOJDBC();
-            default -> {
-                logger.log(Level.WARNING,
-                        () -> "Unsupported tour.persistence=" + persistence + " -> fallback MEMORY");
-                yield new TourDAOMemory();
-            }
-        };
     }
 
     private boolean sameTicketId(String[] row, String ticketId) {

@@ -3,6 +3,7 @@ package com.example.onetour.applicationcontroller;
 import com.example.onetour.bean.LoginBean;
 import com.example.onetour.config.AppConfig;
 import com.example.onetour.dao.LoginDAO;
+import com.example.onetour.enumeration.PersistenceMode;
 import com.example.onetour.enumeration.RoleEnum;
 import com.example.onetour.exception.InvalidFormatException;
 import com.example.onetour.exception.UserNotFoundException;
@@ -23,10 +24,10 @@ public class LoginController {
         String email = loginBean.getEmail().trim().toLowerCase();
         String password = loginBean.getPassword();
 
-        String mode = AppConfig.getInstance().get("app.mode", "DEMO");
+        PersistenceMode mode = AppConfig.getInstance().getPersistenceMode();
 
         UserAccount user;
-        if ("JDBC".equalsIgnoreCase(mode)) {
+        if (mode == PersistenceMode.JDBC) {
             LoginDAO dao = new LoginDAO();
             user = dao.findPerson(email, password);
         } else {
@@ -41,7 +42,7 @@ public class LoginController {
             loginBean.getClass().getMethod("setRole", String.class)
                     .invoke(loginBean, user.getRole().getRoleName());
         } catch (Exception ignored) {
-            // Ignoriamo l'eccezione
+            // intentionally ignored: backward compatibility with old LoginBean
         }
 
         return loginBean;

@@ -2,6 +2,7 @@ package com.example.onetour.boundary;
 
 import com.example.onetour.bean.EmailBean;
 import com.example.onetour.config.AppConfig;
+import com.example.onetour.enumeration.PersistenceMode;
 import com.example.onetour.enumeration.TicketState;
 
 import java.io.BufferedWriter;
@@ -29,12 +30,14 @@ public class EmailNotificationBoundary {
 
         String decisionText = mapDecision(emailBean.getDecision());
 
-        String mode = AppConfig.getInstance().get("app.mode", "DEMO").trim();
-        if ("DEMO".equalsIgnoreCase(mode)) {
+        PersistenceMode mode = AppConfig.getInstance().getPersistenceMode();
+
+        // DEMO: no persistence, just log
+        if (mode == PersistenceMode.DEMO) {
             logger.log(
                     Level.INFO,
                     "[DEMO EMAIL] TO={0} FROM={1} TOUR_ID={2} DECISION={3}",
-                    new Object[] {
+                    new Object[]{
                             emailBean.getUserEmail(),
                             emailBean.getGuideEmail(),
                             emailBean.getTourID(),
@@ -44,6 +47,7 @@ public class EmailNotificationBoundary {
             return;
         }
 
+        // CSV or JDBC modes: writing on filesystem is allowed
         File dir = new File(DATA_DIR);
         if (!dir.exists() && !dir.mkdirs()) {
             logger.log(Level.SEVERE, "Unable to create data directory: {0}", DATA_DIR);

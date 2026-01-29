@@ -4,23 +4,22 @@ import com.example.onetour.exception.TourNotFoundException;
 import com.example.onetour.model.Tour;
 import com.example.onetour.model.TouristGuide;
 
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TourDAOMemory extends TourDAO {
+public class TourDAOCatalog implements TourDAO {
 
     private static final String CITY_BARCELLONA = "Barcellona";
     private static final String CITY_VIENNA = "Vienna";
     private static final String CITY_PARIGI = "Parigi";
     private static final String CITY_LONDRA = "Londra";
+    private static final String CITY_ROMA = "Roma";
 
-    private static final List<Tour> SEED = new ArrayList<>();
-    private static boolean initialized = false;
+    private static final List<Tour> SEED;
 
-    private static void initSeed() {
-        if (initialized) return;
+    static {
+        List<Tour> tmp = new ArrayList<>();
 
         // Guides
         TouristGuide gTest = new TouristGuide(
@@ -159,53 +158,51 @@ public class TourDAOMemory extends TourDAO {
         // =========================
         // ROMA (4 tour)
         // =========================
-        Tour r1 = new Tour("T_ROM_01", "Colosseo & Fori Imperiali", "Roma",
+        Tour r1 = new Tour("T_ROM_01", "Colosseo & Fori Imperiali", CITY_ROMA,
                 LocalDate.of(2026, 2, 10), LocalDate.of(2026, 2, 12), 25.0
         );
         r1.setAttractions(List.of("Colosseo", "Foro Romano", "Palatino"));
         r1.setTouristGuide(g1);
 
-        Tour r2 = new Tour("T_ROM_02", "Vaticano in un giorno", "Roma",
+        Tour r2 = new Tour("T_ROM_02", "Vaticano in un giorno", CITY_ROMA,
                 LocalDate.of(2026, 2, 15), LocalDate.of(2026, 2, 16), 30.0
         );
         r2.setAttractions(List.of("Musei Vaticani", "Cappella Sistina", "Basilica San Pietro"));
         r2.setTouristGuide(g1);
 
-        Tour r3 = new Tour("T_ROM_03", "Trastevere Night Walk", "Roma",
+        Tour r3 = new Tour("T_ROM_03", "Trastevere Night Walk", CITY_ROMA,
                 LocalDate.of(2026, 3, 14), LocalDate.of(2026, 3, 15), 19.0
         );
         r3.setAttractions(List.of("Trastevere", "Isola Tiberina", "Piazza Santa Maria"));
         r3.setTouristGuide(g2);
 
-        Tour r4 = new Tour("T_ROM_04", "Appia Antica & Catacombe", "Roma",
+        Tour r4 = new Tour("T_ROM_04", "Appia Antica & Catacombe", CITY_ROMA,
                 LocalDate.of(2026, 5, 16), LocalDate.of(2026, 5, 17), 33.0
         );
         r4.setAttractions(List.of("Via Appia Antica", "Catacombe", "Parco degli Acquedotti"));
         r4.setTouristGuide(g2);
 
         // tour test
-        Tour tTest = new Tour("T_TEST_1", "Tour Test", "Roma",
+        Tour tTest = new Tour("T_TEST_1", "Tour Test", CITY_ROMA,
                 LocalDate.of(2026, 1, 20), LocalDate.of(2026, 1, 25), 99.90
         );
         tTest.setAttractions(List.of("Colosseo", "Centro Storico"));
         tTest.setTouristGuide(gTest);
 
         // --- SEED ---
-        SEED.add(tTest);
-        SEED.add(b1); SEED.add(b2); SEED.add(b3); SEED.add(b4);
-        SEED.add(v1); SEED.add(v2); SEED.add(v3); SEED.add(v4);
-        SEED.add(p1); SEED.add(p2); SEED.add(p3); SEED.add(p4);
-        SEED.add(l1); SEED.add(l2); SEED.add(l3); SEED.add(l4);
-        SEED.add(r1); SEED.add(r2); SEED.add(r3); SEED.add(r4);
+        tmp.add(tTest);
+        tmp.add(b1); tmp.add(b2); tmp.add(b3); tmp.add(b4);
+        tmp.add(v1); tmp.add(v2); tmp.add(v3); tmp.add(v4);
+        tmp.add(p1); tmp.add(p2); tmp.add(p3); tmp.add(p4);
+        tmp.add(l1); tmp.add(l2); tmp.add(l3); tmp.add(l4);
+        tmp.add(r1); tmp.add(r2); tmp.add(r3); tmp.add(r4);
 
-        initialized = true;
+        SEED = List.copyOf(tmp);
     }
 
     @Override
     public List<Tour> findTours(String cityName, LocalDate departureDate, LocalDate returnDate)
-            throws SQLException, TourNotFoundException {
-
-        initSeed();
+            throws TourNotFoundException {
 
         if (cityName == null || cityName.isBlank()) throw new IllegalArgumentException("cityName null/blank");
         if (departureDate == null || returnDate == null) throw new IllegalArgumentException("dates null");
@@ -225,9 +222,7 @@ public class TourDAOMemory extends TourDAO {
     }
 
     @Override
-    public Tour retrieveTourFromId(String tourID) throws SQLException, TourNotFoundException {
-        initSeed();
-
+    public Tour retrieveTourFromId(String tourID) throws TourNotFoundException {
         if (tourID == null || tourID.isBlank()) throw new IllegalArgumentException("tourID null/blank");
 
         for (Tour t : SEED) {
@@ -238,9 +233,7 @@ public class TourDAOMemory extends TourDAO {
 
     @Override
     public Tour retrieveTour(String tourName, LocalDate departureDate, LocalDate returnDate)
-            throws SQLException, TourNotFoundException {
-
-        initSeed();
+            throws TourNotFoundException {
 
         if (tourName == null || tourName.isBlank()) throw new IllegalArgumentException("tourName null/blank");
         if (departureDate == null || returnDate == null) throw new IllegalArgumentException("dates null");

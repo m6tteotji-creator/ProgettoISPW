@@ -18,7 +18,10 @@ public class SignUpGraphicController {
     @FXML
     public void initialize() {
         NavigatorBase.refreshHeader();
-        errorLabel.setText("");
+        errorLabel.setText(
+                "⚠ Sign up not implemented in this version.\n" +
+                        "The demo focuses on guided tour booking."
+        );
     }
 
     @FXML
@@ -47,6 +50,7 @@ public class SignUpGraphicController {
             errorLabel.setText("Password too short.");
             return;
         }
+
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Sign Up");
         alert.setHeaderText(null);

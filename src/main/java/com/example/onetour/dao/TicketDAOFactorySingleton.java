@@ -1,6 +1,7 @@
 package com.example.onetour.dao;
 
 import com.example.onetour.config.AppConfig;
+import com.example.onetour.enumeration.PersistenceMode;
 
 public class TicketDAOFactorySingleton {
 
@@ -14,40 +15,14 @@ public class TicketDAOFactorySingleton {
         return Helper.INSTANCE;
     }
 
-
     public TicketDAO createTicketDAO() {
-        try {
-            AppConfig cfg = AppConfig.getInstance();
 
-            // app.mode: DEMO | FULL
-            String mode = cfg.get("app.mode", "DEMO").trim();
+        PersistenceMode mode = AppConfig.getInstance().getPersistenceMode();
 
-            // DEMO: force memory ONLY
-            if ("DEMO".equalsIgnoreCase(mode)) {
-                return new TicketDAOMemory();
-            }
-
-            // FULL: choose persistence implementation
-            String persistence = cfg.get("ticket.persistence", "CSV").trim();
-
-            return switch (persistence.toUpperCase()) {
-                case "JDBC" -> new TicketDAOJDBC();
-                case "CSV" -> new TicketDAOCSV();
-                case "MEMORY" -> new TicketDAOMemory();
-                default -> throw new IllegalArgumentException("Unknown ticket.persistence: " + persistence);
-            };
-
-        } catch (RuntimeException re) {
-            throw re;
-        } catch (Exception e) {
-            throw new FactoryConfigurationException("Unable to create TicketDAO", e);
-        }
-
-    }
-
-    public static class FactoryConfigurationException extends RuntimeException {
-        public FactoryConfigurationException(String message, Throwable cause) {
-            super(message, cause);
-        }
+        return switch (mode) {
+            case DEMO -> new TicketDAOMemory();
+            case CSV  -> new TicketDAOCSV();
+            case JDBC -> new TicketDAOJDBC();
+        };
     }
 }

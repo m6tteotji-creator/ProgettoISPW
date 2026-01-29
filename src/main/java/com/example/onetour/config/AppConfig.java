@@ -1,5 +1,7 @@
 package com.example.onetour.config;
 
+import com.example.onetour.enumeration.PersistenceMode;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -11,6 +13,8 @@ public class AppConfig {
     private static final Logger logger = Logger.getLogger(AppConfig.class.getName());
 
     private final Properties props = new Properties();
+
+    private volatile PersistenceMode runtimeMode = null;
 
     private AppConfig() {
         try (InputStream is = AppConfig.class.getResourceAsStream("/com/example/onetour/config.properties")) {
@@ -34,5 +38,25 @@ public class AppConfig {
 
     public String get(String key, String defaultValue) {
         return props.getProperty(key, defaultValue);
+    }
+
+    // ---------------------------
+    // Runtime Persistence Mode
+    // ---------------------------
+
+    public void setPersistenceMode(PersistenceMode mode) {
+        if (mode == null) {
+            throw new IllegalArgumentException("PersistenceMode cannot be null");
+        }
+        this.runtimeMode = mode;
+    }
+
+    public PersistenceMode getPersistenceMode() {
+        if (runtimeMode == null) {
+            throw new IllegalStateException(
+                    "PersistenceMode not set. You must select DEMO / CSV / JDBC at startup."
+            );
+        }
+        return runtimeMode;
     }
 }

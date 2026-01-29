@@ -3,24 +3,23 @@ package com.example.onetour.dao;
 import com.example.onetour.exception.TourNotFoundException;
 import com.example.onetour.model.Tour;
 
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
-public abstract class TourDAO {
+public interface TourDAO {
 
-    public abstract List<Tour> findTours(
+    List<Tour> findTours(
             String cityName,
             LocalDate departureDate,
             LocalDate returnDate
-    ) throws SQLException, TourNotFoundException;
+    ) throws TourNotFoundException;
 
-    public abstract Tour retrieveTourFromId(String tourID)
-            throws SQLException, TourNotFoundException;
+    Tour retrieveTourFromId(String tourID)
+            throws TourNotFoundException;
 
-    public abstract Tour retrieveTour(
+    Tour retrieveTour(
             String tourName,
             LocalDate departureDate,
             LocalDate returnDate
-    ) throws SQLException, TourNotFoundException;
+    ) throws TourNotFoundException;
 }
