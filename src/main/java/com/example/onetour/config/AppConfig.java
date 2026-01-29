@@ -17,7 +17,9 @@ public class AppConfig {
     private volatile PersistenceMode runtimeMode = null;
 
     private AppConfig() {
-        try (InputStream is = AppConfig.class.getResourceAsStream("/com/example/onetour/config.properties")) {
+        try (InputStream is = AppConfig.class.getResourceAsStream(
+                "/com/example/onetour/config.properties")) {
+
             if (is != null) {
                 props.load(is);
             } else {
@@ -58,5 +60,22 @@ public class AppConfig {
             );
         }
         return runtimeMode;
+    }
+
+    // ---------------------------
+    // DEMO / CSV credentials
+    // ---------------------------
+
+    public String getDemoUserEmail() {
+        return get("demo.user.email", "user@user.com").trim().toLowerCase();
+    }
+
+
+    public String getDemoUserPassword() {
+        return get("demo.user.password", "pw123");
+    }
+
+    public String getDemoGuidePassword() {
+        return get("demo.guide.password", "pw123");
     }
 }

@@ -60,6 +60,14 @@ public class SearchTourController {
             String destination = (destinationField != null) ? destinationField.getText() : null;
             LocalDate from = (fromDatePicker != null) ? fromDatePicker.getValue() : null;
             LocalDate to = (toDatePicker != null) ? toDatePicker.getValue() : null;
+            if (from == null || to == null) {
+                showWarningDialog("Seleziona sia la data di partenza che la data di ritorno.");
+                return;
+            }
+            if (to.isBefore(from)) {
+                showWarningDialog("Intervallo date non valido: la data di ritorno deve essere uguale o successiva alla data di partenza.");
+                return;
+            }
 
             SearchBean sb = new SearchBean();
             sb.setSessionID(session.getSessionID());
@@ -82,6 +90,14 @@ public class SearchTourController {
 
     private void showErrorDialog(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Search Tour");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showWarningDialog(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Search Tour");
         alert.setHeaderText(null);
         alert.setContentText(message);

@@ -39,42 +39,48 @@ public class SearchCLIController extends NavigatorCLIController {
     }
 
     private void doSearch() {
-        try {
-            String city = readLine("Citta (cityName): ");
+        while (true) {
+            try {
+                String city = readLine("Citta (cityName): ").trim();
 
-            LocalDate dep = readLocalDateOrNull("Departure date (YYYY-MM-DD) [invio per skip]: ");
-            LocalDate ret = readLocalDateOrNull("Return date (YYYY-MM-DD) [invio per skip]: ");
+                LocalDate dep = readRequiredLocalDate("Departure date (YYYY-MM-DD): ");
+                LocalDate ret = readRequiredLocalDate("Return date (YYYY-MM-DD): ");
 
-            SearchBean sb = new SearchBean();
-            sb.setSessionID(sessionID);
-            sb.setCityName(city);
-            sb.setDepartureDate(dep);
-            sb.setReturnDate(ret);
+                SearchBean sb = new SearchBean();
+                sb.setSessionID(sessionID);
+                sb.setCityName(city);
+                sb.setDepartureDate(dep);
+                sb.setReturnDate(ret);
 
-            List<TourBean> results = bookTourController.searchTours(sb);
+                List<TourBean> results = bookTourController.searchTours(sb);
 
-            if (results == null || results.isEmpty()) {
-                CLIPrinter.printMessage("Nessun tour trovato.\n");
+                if (results == null || results.isEmpty()) {
+                    CLIPrinter.printMessage("Nessun tour trovato.\n");
+                    return;
+                }
+
+                new TourListCLIController(sessionID, results).start();
                 return;
+
+            } catch (Exception e) {
+                CLIPrinter.printMessage("Errore durante la ricerca: " + e.getMessage() + "\n");
+                CLIPrinter.printMessage("Riprova.\n");
             }
-
-            new TourListCLIController(sessionID, results).start();
-
-        } catch (Exception e) {
-            CLIPrinter.printMessage("Errore durante la ricerca: " + e.getMessage() + "\n");
         }
     }
 
-    private LocalDate readLocalDateOrNull(String prompt) {
+
+    private LocalDate readRequiredLocalDate(String prompt) {
         while (true) {
-            String s = readLine(prompt);
+            String s = readLine(prompt).trim();
             if (s.isBlank()) {
-                return null;
+                CLIPrinter.printMessage("La data e' obbligatoria.\n");
+                continue;
             }
             try {
                 return LocalDate.parse(s);
             } catch (DateTimeParseException ex) {
-                CLIPrinter.printMessage("Formato data non valido. Usa YYYY-MM-DD oppure invio per saltare.\n");
+                CLIPrinter.printMessage("Formato data non valido. Usa YYYY-MM-DD.\n");
             }
         }
     }

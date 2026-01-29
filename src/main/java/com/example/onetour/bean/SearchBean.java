@@ -49,9 +49,14 @@ public class SearchBean implements Serializable {
     }
 
     public void checkFields() throws InvalidFormatException {
-        if (cityName == null || cityName.isBlank() ||
-                departureDate == null || returnDate == null) {
-            throw new InvalidFormatException("Please fill all the fields");
+        if (cityName == null || cityName.isBlank()) {
+            throw new InvalidFormatException("City name is required");
+        }
+        if (departureDate == null) {
+            throw new InvalidFormatException("Departure date is required");
+        }
+        if (returnDate == null) {
+            throw new InvalidFormatException("Return date is required");
         }
 
         if (departureDate.isBefore(LocalDate.now())) {
@@ -62,4 +67,5 @@ public class SearchBean implements Serializable {
             throw new InvalidFormatException("Return date cannot be before the departure date");
         }
     }
+
 }

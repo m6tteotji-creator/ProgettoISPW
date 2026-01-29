@@ -25,7 +25,11 @@ import java.util.List;
 
 public class BookTourController {
 
-    private static final TourDAO tourDAO = new TourDAOCatalog();
+    private final TourDAO tourDAO;
+
+    public BookTourController() {
+        this.tourDAO = new TourDAOCatalog();
+    }
 
     public List<TourBean> searchTours(SearchBean searchBean)
             throws InvalidFormatException, TourNotFoundException {
@@ -36,13 +40,15 @@ public class BookTourController {
         String sessionID = searchBean.getSessionID();
         checkSession(sessionID);
 
-        final List<Tour> tours = tourDAO.findTours(
+        List<Tour> tours = tourDAO.findTours(
                 searchBean.getCityName(),
                 searchBean.getDepartureDate(),
                 searchBean.getReturnDate()
         );
 
-        SessionManagerSingleton.getInstance().getSession(sessionID).setLastTourList(tours);
+        SessionManagerSingleton.getInstance()
+                .getSession(sessionID)
+                .setLastTourList(tours);
 
         List<TourBean> out = new ArrayList<>();
         for (Tour t : tours) {
@@ -65,10 +71,11 @@ public class BookTourController {
             throw new InvalidFormatException("Invalid tour");
         }
 
-        final Tour tour = tourDAO.retrieveTourFromId(tourBeanIn.getTourID());
-        if (tour == null) throw new TourNotFoundException("Tour not found");
+        Tour tour = tourDAO.retrieveTourFromId(tourBeanIn.getTourID());
 
-        SessionManagerSingleton.getInstance().getSession(sessionID).setActualTour(tour);
+        SessionManagerSingleton.getInstance()
+                .getSession(sessionID)
+                .setActualTour(tour);
 
         TourBean out = TourBean.fromModel(tour);
         out.setSessionID(sessionID);
@@ -90,7 +97,9 @@ public class BookTourController {
         String tourId = resolveTourId(sessionID, bookingBean);
 
         Tour selectedTour = loadTourById(tourId);
-        SessionManagerSingleton.getInstance().getSession(sessionID).setActualTour(selectedTour);
+        SessionManagerSingleton.getInstance()
+                .getSession(sessionID)
+                .setActualTour(selectedTour);
 
         TicketDAO ticketDAO = buildTicketDAO();
         enforceNoActiveDuplicate(ticketDAO, userEmail, tourId);
@@ -181,24 +190,31 @@ public class BookTourController {
         validateDecisionBean(emailBean);
 
         TicketDAO ticketDAO = buildTicketDAO();
-        ticketDAO.modifyState(emailBean.getTicketID(), emailBean.getDecision());
+
+        List<Ticket> allTickets = ticketDAO.retrieveByGuide(actor.getUserEmail());
+        Ticket ticket = allTickets.stream()
+                .filter(t -> emailBean.getTicketID().equals(t.getTicketID()))
+                .findFirst()
+                .orElseThrow(() ->
+                        new TicketNotFoundException("Ticket not found: " + emailBean.getTicketID()));
+
+        ticketDAO.modifyState(ticket.getTicketID(), emailBean.getDecision());
 
         emailBean.setGuideEmail(actor.getUserEmail());
+        emailBean.setUserEmail(ticket.getUserEmail());
+        emailBean.setTourID(ticket.getTour().getTourID());
 
-        Ticket t = ticketDAO.retrieveByGuide(actor.getUserEmail()).stream()
-                .filter(x -> emailBean.getTicketID().equals(x.getTicketID()))
-                .findFirst()
-                .orElseThrow(() -> new TicketNotFoundException("Ticket not found: " + emailBean.getTicketID()));
-
-        emailBean.setUserEmail(t.getUserEmail());
-        emailBean.setTourID(t.getTour().getTourID());
-
-        EmailNotificationBoundary boundary = new EmailNotificationBoundary();
-        boundary.sendNotification(emailBean);
+        new EmailNotificationBoundary().sendNotification(emailBean);
     }
 
+    /* =======================
+       Utility methods
+       ======================= */
+
     private static UserAccount getUserFromSession(String sessionID) throws InvalidFormatException {
-        UserAccount user = SessionManagerSingleton.getInstance().getSession(sessionID).getUser();
+        UserAccount user = SessionManagerSingleton.getInstance()
+                .getSession(sessionID)
+                .getUser();
         if (user == null) throw new InvalidFormatException("User not in session");
         return user;
     }
@@ -221,11 +237,16 @@ public class BookTourController {
         return email;
     }
 
-    private static String resolveTourId(String sessionID, BookingBean bookingBean) throws InvalidFormatException {
+    private static String resolveTourId(String sessionID, BookingBean bookingBean)
+            throws InvalidFormatException {
+
         String tourId = bookingBean.getTourID();
         if (tourId != null && !tourId.isBlank()) return tourId;
 
-        Tour fallback = SessionManagerSingleton.getInstance().getSession(sessionID).getActualTour();
+        Tour fallback = SessionManagerSingleton.getInstance()
+                .getSession(sessionID)
+                .getActualTour();
+
         if (fallback == null || fallback.getTourID() == null || fallback.getTourID().isBlank()) {
             throw new InvalidFormatException("No selected tour");
         }
@@ -234,9 +255,7 @@ public class BookTourController {
 
     private Tour loadTourById(String tourId) throws InvalidFormatException {
         try {
-            Tour t = tourDAO.retrieveTourFromId(tourId);
-            if (t == null) throw new InvalidFormatException("Tour not found");
-            return t;
+            return tourDAO.retrieveTourFromId(tourId);
         } catch (TourNotFoundException e) {
             throw new InvalidFormatException("Tour not found", e);
         }
@@ -253,27 +272,16 @@ public class BookTourController {
         }
 
         for (Ticket t : existing) {
-            if (!isSameTour(t, tourId)) {
-                continue;
-            }
+            if (t.getTour() == null) continue;
+            if (!tourId.equals(t.getTour().getTourID())) continue;
 
             TicketState st = t.getState();
-            if (isActiveState(st)) {
+            if (st == TicketState.PENDING || st == TicketState.CONFIRMED) {
                 throw new DuplicateTicketException(
                         "You already have an active booking request for this tour (state=" + st + ")."
                 );
             }
         }
-    }
-
-    private static boolean isSameTour(Ticket t, String tourId) {
-        if (t == null || t.getTour() == null) return false;
-        String existingTourId = t.getTour().getTourID();
-        return existingTourId != null && existingTourId.equals(tourId);
-    }
-
-    private static boolean isActiveState(TicketState st) {
-        return st == TicketState.PENDING || st == TicketState.CONFIRMED;
     }
 
     private static void validateDecisionBean(EmailBean emailBean) throws InvalidFormatException {

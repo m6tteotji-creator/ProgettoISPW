@@ -12,12 +12,13 @@ import java.util.logging.Logger;
 public class SessionManagerSingleton {
 
     private static final Logger logger = Logger.getLogger(SessionManagerSingleton.class.getName());
-    private final Map<String, Session> activeSessions;
+    private final Map<String, Session> activeSessions = new ConcurrentHashMap<>();
 
+    // Single-user desktop app (CLI/FX): keeps track of current session
     private volatile String currentSessionID;
 
     private SessionManagerSingleton() {
-        this.activeSessions = new ConcurrentHashMap<>();
+        // singleton
     }
 
     private static class Helper {
@@ -29,14 +30,14 @@ public class SessionManagerSingleton {
     }
 
     public String addSession(UserAccount user) {
-        if (user == null || user.getUserEmail() == null) {
-            throw new IllegalArgumentException("User or email is null");
-        }
+        if (user == null) throw new IllegalArgumentException("User is null");
+        String email = normalizeEmail(user.getUserEmail());
+        if (email.isBlank()) throw new IllegalArgumentException("User email is null/blank");
 
-        Session existing = findSessionByEmail(user.getUserEmail());
+        Session existing = findSessionByEmail(email);
         if (existing != null) {
-            logger.log(Level.WARNING, "Session already exists for email: {0}", user.getUserEmail());
             currentSessionID = existing.getSessionID();
+            logger.log(Level.INFO, "Reusing existing session for email: {0}", email);
             return existing.getSessionID();
         }
 
@@ -45,41 +46,45 @@ public class SessionManagerSingleton {
         activeSessions.put(sessionID, session);
 
         currentSessionID = sessionID;
-
         return sessionID;
     }
 
     public void removeSession(String sessionID) {
-        if (sessionID == null) return;
+        if (sessionID == null || sessionID.isBlank()) return;
+
         activeSessions.remove(sessionID);
 
-        if (sessionID.equals(currentSessionID)) {
+        String current = currentSessionID;
+        if (current != null && current.equals(sessionID)) {
             currentSessionID = null;
         }
     }
 
     public Session getSession(String sessionID) {
-        if (sessionID == null) return null;
+        if (sessionID == null || sessionID.isBlank()) return null;
         return activeSessions.get(sessionID);
     }
 
     public Session getCurrentSession() {
-        if (currentSessionID == null) return null;
-        return activeSessions.get(currentSessionID);
+        String current = currentSessionID;
+        if (current == null) return null;
+        return activeSessions.get(current);
     }
 
     public void clearCurrentSession() {
         currentSessionID = null;
     }
 
-    private Session findSessionByEmail(String email) {
-        String normalized = email.trim().toLowerCase();
+    private Session findSessionByEmail(String normalizedEmail) {
         return activeSessions.values()
                 .stream()
                 .filter(s -> s.getUser() != null
-                        && s.getUser().getUserEmail() != null
-                        && s.getUser().getUserEmail().trim().toLowerCase().equals(normalized))
+                        && normalizeEmail(s.getUser().getUserEmail()).equals(normalizedEmail))
                 .findFirst()
                 .orElse(null);
+    }
+
+    private String normalizeEmail(String email) {
+        return email == null ? "" : email.trim().toLowerCase();
     }
 }

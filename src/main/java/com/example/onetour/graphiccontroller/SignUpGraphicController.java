@@ -18,9 +18,10 @@ public class SignUpGraphicController {
     @FXML
     public void initialize() {
         NavigatorBase.refreshHeader();
+
         errorLabel.setText(
-                "⚠ Sign up not implemented in this version.\n" +
-                        "The demo focuses on guided tour booking."
+                "Sign up not implemented in this version.\n" +
+                        "Use DEMO credentials or JDBC accounts."
         );
     }
 
@@ -31,36 +32,13 @@ public class SignUpGraphicController {
 
     @FXML
     private void onSignUpClicked() {
-        errorLabel.setText("");
-
-        String name = safe(nameField.getText());
-        String surname = safe(surnameField.getText());
-        String email = safe(emailField.getText()).toLowerCase();
-        String password = passwordField.getText() == null ? "" : passwordField.getText();
-
-        if (name.isBlank() || surname.isBlank() || email.isBlank() || password.isBlank()) {
-            errorLabel.setText("Fill in all fields.");
-            return;
-        }
-        if (!email.contains("@") || !email.contains(".")) {
-            errorLabel.setText("Invalid email format.");
-            return;
-        }
-        if (password.length() < 4) {
-            errorLabel.setText("Password too short.");
-            return;
-        }
-
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Sign Up");
-        alert.setHeaderText(null);
-        alert.setContentText("Registration completed. Now login.");
+        alert.setHeaderText("Not implemented");
+        alert.setContentText(
+                "Sign up is not implemented in this version.\n" +
+                        "Please go back and login using DEMO credentials or JDBC accounts."
+        );
         alert.showAndWait();
-
-        NavigatorBase.goTo("/fxml/pages/page2_login.fxml");
-    }
-
-    private String safe(String s) {
-        return s == null ? "" : s.trim();
     }
 }
