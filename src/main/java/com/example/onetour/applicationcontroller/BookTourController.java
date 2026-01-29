@@ -272,11 +272,16 @@ public class BookTourController {
         }
 
         for (Ticket t : existing) {
-            if (t.getTour() == null) continue;
-            if (!tourId.equals(t.getTour().getTourID())) continue;
+            String existingTourId = (t != null && t.getTour() != null) ? t.getTour().getTourID() : null;
+            if (existingTourId == null) {
+                continue; // single continue (allowed by the rule)
+            }
 
+            boolean sameTour = existingTourId.equals(tourId);
             TicketState st = t.getState();
-            if (st == TicketState.PENDING || st == TicketState.CONFIRMED) {
+            boolean active = (st == TicketState.PENDING || st == TicketState.CONFIRMED);
+
+            if (sameTour && active) {
                 throw new DuplicateTicketException(
                         "You already have an active booking request for this tour (state=" + st + ")."
                 );
