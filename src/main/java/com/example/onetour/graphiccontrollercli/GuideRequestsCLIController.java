@@ -4,6 +4,7 @@ import com.example.onetour.applicationcontroller.BookTourController;
 import com.example.onetour.bean.BookingBean;
 import com.example.onetour.bean.EmailBean;
 import com.example.onetour.enumeration.TicketState;
+import com.example.onetour.util.Printer;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,11 +20,11 @@ public class GuideRequestsCLIController extends NavigatorCLIController {
 
     public void start() {
         while (true) {
-            CLIPrinter.printMessage("\n");
-            CLIPrinter.printMessage("=== AREA GUIDA ===\n");
-            CLIPrinter.printMessage("1) Visualizza richieste\n");
-            CLIPrinter.printMessage("2) Visualizza storico\n");
-            CLIPrinter.printMessage("3) Logout\n");
+            Printer.printMessage("\n");
+            Printer.printMessage("=== AREA GUIDA ===\n");
+            Printer.printMessage("1) Visualizza richieste\n");
+            Printer.printMessage("2) Visualizza storico\n");
+            Printer.printMessage("3) Logout\n");
 
             int choice = readInt("Seleziona: ", 1, 3);
 
@@ -44,18 +45,18 @@ public class GuideRequestsCLIController extends NavigatorCLIController {
             List<BookingBean> pending = bookTourController.getPendingRequests(sessionId);
 
             if (pending == null || pending.isEmpty()) {
-                CLIPrinter.printMessage("Nessuna richiesta.\n");
+                Printer.printMessage("Nessuna richiesta.\n");
                 return;
             }
 
-            CLIPrinter.printMessage("\n");
-            CLIPrinter.printMessage("Richieste:\n");
+            Printer.printMessage("\n");
+            Printer.printMessage("Richieste:\n");
             int max = pending.size();
 
             for (int i = 0; i < max; i++) {
                 BookingBean b = pending.get(i);
 
-                CLIPrinter.printMessage(String.format(
+                Printer.printMessage(String.format(
                         "%d) Guida: %s | Tour: %s | Data: %s | Stato: %s%n",
                         i + 1,
                         safe(b.getGuideName()),
@@ -64,10 +65,10 @@ public class GuideRequestsCLIController extends NavigatorCLIController {
                         safeState(b.getState())
                 ));
 
-                CLIPrinter.printMessage("   TicketID: " + safe(b.getTicketID()) + "\n");
+                Printer.printMessage("   TicketID: " + safe(b.getTicketID()) + "\n");
             }
 
-            CLIPrinter.printMessage("0) Indietro\n");
+            Printer.printMessage("0) Indietro\n");
             int idx = readInt("Seleziona una richiesta: ", 0, max);
             if (idx == 0) {
                 return;
@@ -75,10 +76,10 @@ public class GuideRequestsCLIController extends NavigatorCLIController {
 
             BookingBean selected = pending.get(idx - 1);
 
-            CLIPrinter.printMessage("\n");
-            CLIPrinter.printMessage("1) Conferma\n");
-            CLIPrinter.printMessage("2) Rifiuta\n");
-            CLIPrinter.printMessage("0) Annulla\n");
+            Printer.printMessage("\n");
+            Printer.printMessage("1) Conferma\n");
+            Printer.printMessage("2) Rifiuta\n");
+            Printer.printMessage("0) Annulla\n");
             int decision = readInt("Scelta: ", 0, 2);
             if (decision == 0) {
                 return;
@@ -93,10 +94,10 @@ public class GuideRequestsCLIController extends NavigatorCLIController {
 
             bookTourController.guideDecision(eb);
 
-            CLIPrinter.printMessage("Decisione salvata (" + (accept ? "CONFERMATA" : "RIFIUTATA") + ").\n");
+            Printer.printMessage("Decisione salvata (" + (accept ? "CONFERMATA" : "RIFIUTATA") + ").\n");
 
         } catch (Exception e) {
-            CLIPrinter.printMessage("Errore: " + e.getMessage() + "\n");
+            Printer.printMessage("Errore: " + e.getMessage() + "\n");
         }
     }
 
@@ -105,17 +106,17 @@ public class GuideRequestsCLIController extends NavigatorCLIController {
             List<BookingBean> all = bookTourController.getAllRequestsByGuide(sessionId);
 
             if (all == null || all.isEmpty()) {
-                CLIPrinter.printMessage("Nessuna richiesta trovata.\n");
+                Printer.printMessage("Nessuna richiesta trovata.\n");
                 return;
             }
 
-            CLIPrinter.printMessage("\n");
-            CLIPrinter.printMessage("Storico richieste:\n");
+            Printer.printMessage("\n");
+            Printer.printMessage("Storico richieste:\n");
 
             for (int i = 0; i < all.size(); i++) {
                 BookingBean b = all.get(i);
 
-                CLIPrinter.printMessage(String.format(
+                Printer.printMessage(String.format(
                         "%d) Tour: %s | Data: %s | Stato: %s | TicketID: %s%n",
                         i + 1,
                         safe(b.getTourName()),
@@ -126,7 +127,7 @@ public class GuideRequestsCLIController extends NavigatorCLIController {
             }
 
         } catch (Exception e) {
-            CLIPrinter.printMessage("Errore: " + e.getMessage() + "\n");
+            Printer.printMessage("Errore: " + e.getMessage() + "\n");
         }
     }
 

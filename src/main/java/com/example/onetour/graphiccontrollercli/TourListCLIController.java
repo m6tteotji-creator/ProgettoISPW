@@ -1,6 +1,7 @@
 package com.example.onetour.graphiccontrollercli;
 
 import com.example.onetour.bean.TourBean;
+import com.example.onetour.util.Printer;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,11 +18,11 @@ public class TourListCLIController extends NavigatorCLIController {
 
     public void start() {
         while (true) {
-            CLIPrinter.printMessage("\n");
-            CLIPrinter.printMessage("=== RISULTATI TOUR ===\n");
+            Printer.printMessage("\n");
+            Printer.printMessage("=== RISULTATI TOUR ===\n");
 
             if (tours == null || tours.isEmpty()) {
-                CLIPrinter.printMessage("Nessun risultato.\n");
+                Printer.printMessage("Nessun risultato.\n");
                 return;
             }
 
@@ -36,7 +37,7 @@ public class TourListCLIController extends NavigatorCLIController {
                 String price = formatPrice(t.getPrice());
                 String guide = safe(t.getGuideName());
 
-                CLIPrinter.printMessage(String.format(
+                Printer.printMessage(String.format(
                         "%d) %s | %s | %s -> %s | %s | Guida: %s%n",
                         i + 1,
                         tourName,
@@ -48,7 +49,7 @@ public class TourListCLIController extends NavigatorCLIController {
                 ));
             }
 
-            CLIPrinter.printMessage("0) Indietro\n");
+            Printer.printMessage("0) Indietro\n");
             int choice = readInt("Seleziona un tour: ", 0, max);
 
             if (choice == 0) {

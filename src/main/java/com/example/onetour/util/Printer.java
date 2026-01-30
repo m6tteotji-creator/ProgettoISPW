@@ -1,7 +1,7 @@
-package com.example.onetour.graphiccontrollercli;
+package com.example.onetour.util;
 
-public class CLIPrinter {
-    private CLIPrinter() {
+public class Printer {
+    private Printer() {
         throw new IllegalStateException("Utility class");
     }
 

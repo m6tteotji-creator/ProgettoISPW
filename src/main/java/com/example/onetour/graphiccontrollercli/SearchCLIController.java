@@ -3,6 +3,7 @@ package com.example.onetour.graphiccontrollercli;
 import com.example.onetour.applicationcontroller.BookTourController;
 import com.example.onetour.bean.SearchBean;
 import com.example.onetour.bean.TourBean;
+import com.example.onetour.util.Printer;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -19,11 +20,11 @@ public class SearchCLIController extends NavigatorCLIController {
 
     public void start() {
         while (true) {
-            CLIPrinter.printMessage("\n");
-            CLIPrinter.printMessage("=== RICERCA TOUR ===\n");
-            CLIPrinter.printMessage("1) Cerca tour\n");
-            CLIPrinter.printMessage("2) Le mie prenotazioni\n");
-            CLIPrinter.printMessage("3) Logout\n");
+            Printer.printMessage("\n");
+            Printer.printMessage("=== RICERCA TOUR ===\n");
+            Printer.printMessage("1) Cerca tour\n");
+            Printer.printMessage("2) Le mie prenotazioni\n");
+            Printer.printMessage("3) Logout\n");
 
             int choice = readInt("Seleziona: ", 1, 3);
 
@@ -33,7 +34,7 @@ public class SearchCLIController extends NavigatorCLIController {
                 case 3 -> {
                     return;
                 }
-                default -> CLIPrinter.printMessage("Scelta non valida.\n");
+                default -> Printer.printMessage("Scelta non valida.\n");
             }
         }
     }
@@ -55,7 +56,7 @@ public class SearchCLIController extends NavigatorCLIController {
                 List<TourBean> results = bookTourController.searchTours(sb);
 
                 if (results == null || results.isEmpty()) {
-                    CLIPrinter.printMessage("Nessun tour trovato.\n");
+                    Printer.printMessage("Nessun tour trovato.\n");
                     return;
                 }
 
@@ -63,8 +64,8 @@ public class SearchCLIController extends NavigatorCLIController {
                 return;
 
             } catch (Exception e) {
-                CLIPrinter.printMessage("Errore durante la ricerca: " + e.getMessage() + "\n");
-                CLIPrinter.printMessage("Riprova.\n");
+                Printer.printMessage("Errore durante la ricerca: " + e.getMessage() + "\n");
+                Printer.printMessage("Riprova.\n");
             }
         }
     }
@@ -74,13 +75,13 @@ public class SearchCLIController extends NavigatorCLIController {
         while (true) {
             String s = readLine(prompt).trim();
             if (s.isBlank()) {
-                CLIPrinter.printMessage("La data e' obbligatoria.\n");
+                Printer.printMessage("La data e' obbligatoria.\n");
                 continue;
             }
             try {
                 return LocalDate.parse(s);
             } catch (DateTimeParseException ex) {
-                CLIPrinter.printMessage("Formato data non valido. Usa YYYY-MM-DD.\n");
+                Printer.printMessage("Formato data non valido. Usa YYYY-MM-DD.\n");
             }
         }
     }

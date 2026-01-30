@@ -3,6 +3,7 @@ package com.example.onetour.graphiccontrollercli;
 import com.example.onetour.applicationcontroller.BookTourController;
 import com.example.onetour.bean.BookingBean;
 import com.example.onetour.bean.TourBean;
+import com.example.onetour.util.Printer;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,7 +21,7 @@ public class TourDetailsCLIController extends NavigatorCLIController {
 
     public void start() {
         if (tourId == null || tourId.isBlank()) {
-            CLIPrinter.printMessage("Errore: tour non valido.\n");
+            Printer.printMessage("Errore: tour non valido.\n");
             return;
         }
 
@@ -32,17 +33,17 @@ public class TourDetailsCLIController extends NavigatorCLIController {
 
             details = bookTourController.getTourDescription(in);
         } catch (Exception e) {
-            CLIPrinter.printMessage("Errore nel caricamento dettagli tour: " + e.getMessage() + "\n");
+            Printer.printMessage("Errore nel caricamento dettagli tour: " + e.getMessage() + "\n");
             return;
         }
 
         while (true) {
             printDetails(details);
 
-            CLIPrinter.printMessage("\n");
-            CLIPrinter.printMessage("1) Prenota\n");
-            CLIPrinter.printMessage("2) Vai a Prenotazioni\n");
-            CLIPrinter.printMessage("0) Indietro\n");
+            Printer.printMessage("\n");
+            Printer.printMessage("1) Prenota\n");
+            Printer.printMessage("2) Vai a Prenotazioni\n");
+            Printer.printMessage("0) Indietro\n");
             int choice = readInt("Seleziona: ", 0, 2);
 
             switch (choice) {
@@ -51,27 +52,27 @@ public class TourDetailsCLIController extends NavigatorCLIController {
                 }
                 case 1 -> doBooking();
                 case 2 -> new MyBookingsCLIController(sessionId).start();
-                default -> CLIPrinter.printMessage("Scelta non valida.\n");
+                default -> Printer.printMessage("Scelta non valida.\n");
             }
         }
     }
 
     private void printDetails(TourBean t) {
-        CLIPrinter.printMessage("\n");
-        CLIPrinter.printMessage("=== DETTAGLI TOUR ===\n");
-        CLIPrinter.printMessage("ID: " + safe(t.getTourID()) + "\n");
-        CLIPrinter.printMessage("Nome tour: " + safe(t.getTourName()) + "\n");
-        CLIPrinter.printMessage("Città: " + safe(t.getCityName()) + "\n");
-        CLIPrinter.printMessage("Partenza: " + safeDate(t.getDepartureDate()) + "\n");
-        CLIPrinter.printMessage("Ritorno: " + safeDate(t.getReturnDate()) + "\n");
-        CLIPrinter.printMessage("Guida: " + safe(t.getGuideName()) + "\n");
-        CLIPrinter.printMessage("Prezzo: " + t.getPrice() + "\n");
+        Printer.printMessage("\n");
+        Printer.printMessage("=== DETTAGLI TOUR ===\n");
+        Printer.printMessage("ID: " + safe(t.getTourID()) + "\n");
+        Printer.printMessage("Nome tour: " + safe(t.getTourName()) + "\n");
+        Printer.printMessage("Città: " + safe(t.getCityName()) + "\n");
+        Printer.printMessage("Partenza: " + safeDate(t.getDepartureDate()) + "\n");
+        Printer.printMessage("Ritorno: " + safeDate(t.getReturnDate()) + "\n");
+        Printer.printMessage("Guida: " + safe(t.getGuideName()) + "\n");
+        Printer.printMessage("Prezzo: " + t.getPrice() + "\n");
 
         List<String> attr = t.getAttractions();
         if (attr != null && !attr.isEmpty()) {
-            CLIPrinter.printMessage("Attrazioni:\n");
+            Printer.printMessage("Attrazioni:\n");
             for (String a : attr) {
-                CLIPrinter.printMessage(" - " + safe(a) + "\n");
+                Printer.printMessage(" - " + safe(a) + "\n");
             }
         }
     }
@@ -83,11 +84,11 @@ public class TourDetailsCLIController extends NavigatorCLIController {
 
             BookingBean out = bookTourController.createTicket(in);
 
-            CLIPrinter.printMessage("Prenotazione creata!\n");
-            CLIPrinter.printMessage("Ticket ID: " + safe(out.getTicketID()) + "\n");
-            CLIPrinter.printMessage("Stato: " + safeState(out.getState()) + "\n");
+            Printer.printMessage("Prenotazione creata!\n");
+            Printer.printMessage("Ticket ID: " + safe(out.getTicketID()) + "\n");
+            Printer.printMessage("Stato: " + safeState(out.getState()) + "\n");
         } catch (Exception e) {
-            CLIPrinter.printMessage("Errore prenotazione: " + e.getMessage() + "\n");
+            Printer.printMessage("Errore prenotazione: " + e.getMessage() + "\n");
         }
     }
 

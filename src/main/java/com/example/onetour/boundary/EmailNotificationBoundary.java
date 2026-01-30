@@ -4,18 +4,15 @@ import com.example.onetour.bean.EmailBean;
 import com.example.onetour.config.AppConfig;
 import com.example.onetour.enumeration.PersistenceMode;
 import com.example.onetour.enumeration.TicketState;
+import com.example.onetour.util.Printer;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class EmailNotificationBoundary {
-
-    private static final Logger logger = Logger.getLogger(EmailNotificationBoundary.class.getName());
 
     private static final String DATA_DIR =
             System.getProperty("user.home") + File.separator + "onetour-data";
@@ -23,35 +20,24 @@ public class EmailNotificationBoundary {
             DATA_DIR + File.separator + "email_notifications.txt";
 
     public void sendNotification(EmailBean emailBean) {
-        if (emailBean == null) {
-            logger.warning("EmailBean is null");
-            return;
-        }
+        if (emailBean == null) return;
 
         String decisionText = mapDecision(emailBean.getDecision());
-
         PersistenceMode mode = AppConfig.getInstance().getPersistenceMode();
-
-        // DEMO: no persistence, just log
+        
         if (mode == PersistenceMode.DEMO) {
-            logger.log(
-                    Level.INFO,
-                    "[DEMO EMAIL] TO={0} FROM={1} TOUR_ID={2} DECISION={3}",
-                    new Object[]{
-                            emailBean.getUserEmail(),
-                            emailBean.getGuideEmail(),
-                            emailBean.getTourID(),
-                            decisionText
-                    }
-            );
+            Printer.printMessage("\n");
+            Printer.printMessage("=== NOTIFICA EMAIL (DEMO) ===\n");
+            Printer.printMessage("Da (Guida): " + safe(emailBean.getGuideEmail()) + "\n");
+            Printer.printMessage("A (Utente): " + safe(emailBean.getUserEmail()) + "\n");
+            Printer.printMessage("Tour ID: " + safe(emailBean.getTourID()) + "\n");
+            Printer.printMessage("Esito: " + decisionText + "\n");
+            Printer.printMessage("============================\n");
             return;
         }
-
-        // CSV or JDBC modes: writing on filesystem is allowed
         File dir = new File(DATA_DIR);
-        if (!dir.exists() && !dir.mkdirs()) {
-            logger.log(Level.SEVERE, "Unable to create data directory: {0}", DATA_DIR);
-            return;
+        if (!dir.exists()) {
+            dir.mkdirs();
         }
 
         String message = String.format(
@@ -64,28 +50,30 @@ public class EmailNotificationBoundary {
                         "Your booking request has been %s.%n" +
                         "=====================================%n%n",
                 LocalDateTime.now(),
-                emailBean.getGuideEmail(),
-                emailBean.getUserEmail(),
-                emailBean.getTourID(),
+                safe(emailBean.getGuideEmail()),
+                safe(emailBean.getUserEmail()),
+                safe(emailBean.getTourID()),
                 decisionText
         );
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, true))) {
             writer.write(message);
-        } catch (IOException e) {
-            logger.log(Level.SEVERE, "Error writing email notification", e);
+        } catch (IOException ignored) {
+            // silent failure: boundary simulates an external service
         }
     }
 
     private String mapDecision(TicketState decision) {
-        if (decision == null) {
-            return "processed";
-        }
+        if (decision == null) return "PROCESSED";
 
         return switch (decision) {
             case CONFIRMED -> "ACCEPTED";
             case REJECTED -> "REJECTED";
             case PENDING -> "RECEIVED";
         };
+    }
+
+    private String safe(String s) {
+        return (s == null || s.isBlank()) ? "-" : s;
     }
 }
