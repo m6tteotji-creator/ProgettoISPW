@@ -184,7 +184,7 @@ public class TourDAOCatalog implements TourDAO {
 
         // tour test
         Tour tTest = new Tour("T_TEST_1", "Tour Test", CITY_ROMA,
-                LocalDate.of(2026, 1, 20), LocalDate.of(2026, 1, 25), 99.90
+                LocalDate.of(2026, 3, 20), LocalDate.of(2026, 3, 25), 99.90
         );
         tTest.setAttractions(List.of("Colosseo", "Centro Storico"));
         tTest.setTouristGuide(gTest);

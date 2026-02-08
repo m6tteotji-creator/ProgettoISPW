@@ -3,11 +3,13 @@ package com.example.onetour.graphiccontroller;
 import com.example.onetour.applicationcontroller.BookTourController;
 import com.example.onetour.bean.BookingBean;
 import com.example.onetour.bean.TourBean;
+import com.example.onetour.exception.DuplicateTicketException;
 import com.example.onetour.exception.InvalidFormatException;
 import com.example.onetour.exception.TourNotFoundException;
 import com.example.onetour.model.Session;
 import com.example.onetour.model.Tour;
 import com.example.onetour.sessionmanagement.SessionManagerSingleton;
+import com.example.onetour.util.Printer;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -138,18 +140,27 @@ public class GuidedTourController {
             showInfoDialog("Prenotazione inviata!\nStato: " + created.getState());
             NavigatorBase.goTo("/fxml/pages/page7_bookings.fxml");
 
+        } catch (DuplicateTicketException e) {
+            // Errore di dominio previsto → NO stacktrace
+            Printer.printMessage(
+                    "Errore prenotazione: ticket già esistente per questo tour."
+            );
+
+            statusLabel.setText("Hai già una prenotazione attiva per questo tour.");
+            showErrorDialog("Hai già una prenotazione attiva per questo tour.");
+
         } catch (InvalidFormatException e) {
             logger.log(Level.WARNING, e.getMessage());
             statusLabel.setText(e.getMessage());
             showErrorDialog(e.getMessage());
 
         } catch (Exception e) {
+            // Errore imprevisto → logging severo
             logger.log(Level.SEVERE, e.getMessage(), e);
             statusLabel.setText("Errore durante la prenotazione.");
             showErrorDialog("Errore durante la prenotazione.");
         }
     }
-
 
     private void goBackToLogin() {
         showErrorDialog("Sessione non valida. Effettua di nuovo il login.");

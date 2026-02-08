@@ -24,7 +24,6 @@ public class EmailNotificationBoundary {
 
         String decisionText = mapDecision(emailBean.getDecision());
         PersistenceMode mode = AppConfig.getInstance().getPersistenceMode();
-        
         if (mode == PersistenceMode.DEMO) {
             Printer.printMessage("\n");
             Printer.printMessage("=== NOTIFICA EMAIL (DEMO) ===\n");
