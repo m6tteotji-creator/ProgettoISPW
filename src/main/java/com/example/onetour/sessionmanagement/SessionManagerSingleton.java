@@ -14,7 +14,6 @@ public class SessionManagerSingleton {
     private static final Logger logger = Logger.getLogger(SessionManagerSingleton.class.getName());
     private final Map<String, Session> activeSessions = new ConcurrentHashMap<>();
 
-    // Single-user desktop app (CLI/FX): keeps track of current session
     private volatile String currentSessionID;
 
     private SessionManagerSingleton() {

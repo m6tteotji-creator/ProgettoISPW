@@ -76,7 +76,6 @@ public class LoginController {
             if (G4_EMAIL.equals(email))    return new UserAccount("G004", "Sofia", G4_EMAIL, RoleEnum.TOURISTGUIDE);
         }
 
-        // Single, consistent error message
         throw new UserNotFoundException(
                 "Invalid credentials (DEMO/CSV mode). " +
                         "Tourist email: " + cfg.getDemoUserEmail() + ". " +

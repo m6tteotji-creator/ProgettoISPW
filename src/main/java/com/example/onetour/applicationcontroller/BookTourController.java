@@ -207,9 +207,6 @@ public class BookTourController {
         new EmailNotificationBoundary().sendNotification(emailBean);
     }
 
-    /* =======================
-       Utility methods
-       ======================= */
 
     private static UserAccount getUserFromSession(String sessionID) throws InvalidFormatException {
         UserAccount user = SessionManagerSingleton.getInstance()

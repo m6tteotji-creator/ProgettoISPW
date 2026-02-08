@@ -87,7 +87,6 @@ public class TicketDAOJDBC extends TicketDAO {
             throw new IllegalArgumentException("guideEmail missing");
         }
 
-        // 1) Read all pending tickets from DB
         List<Ticket> out = new ArrayList<>();
 
         try (Connection conn = DBConnection.getConnection();
@@ -192,7 +191,6 @@ public class TicketDAOJDBC extends TicketDAO {
             Tour fullTour = tourDAO.retrieveTourFromId(tourID);
             t.setTour(fullTour);
         } catch (TourNotFoundException e) {
-            // Fallback: tour not found in memory seed
             Tour minimal = new Tour(tourID, "", "", bookingDate, bookingDate, 0.0);
             t.setTour(minimal);
         }
