@@ -39,13 +39,11 @@ public class TourListController {
             NavigatorBase.goTo("/fxml/pages/page4_home.fxml");
             return;
         }
-
-        List<TourBean> beans = session.getLastTourList().stream()
-                .map(TourBean::fromModel)
-                .toList();
+        List<TourBean> beans = session.getLastTourList();
 
         tourListView.setItems(FXCollections.observableArrayList(beans));
     }
+
 
     private void setupClickableCells() {
         tourListView.setCellFactory(listView -> new ListCell<>() {

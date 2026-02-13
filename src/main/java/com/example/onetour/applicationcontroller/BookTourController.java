@@ -46,16 +46,17 @@ public class BookTourController {
                 searchBean.getReturnDate()
         );
 
-        SessionManagerSingleton.getInstance()
-                .getSession(sessionID)
-                .setLastTourList(tours);
-
         List<TourBean> out = new ArrayList<>();
         for (Tour t : tours) {
             TourBean b = TourBean.fromModel(t);
             b.setSessionID(sessionID);
             out.add(b);
         }
+
+        SessionManagerSingleton.getInstance()
+                .getSession(sessionID)
+                .setLastTourList(out);
+
         return out;
     }
 
@@ -73,12 +74,13 @@ public class BookTourController {
 
         Tour tour = tourDAO.retrieveTourFromId(tourBeanIn.getTourID());
 
-        SessionManagerSingleton.getInstance()
-                .getSession(sessionID)
-                .setActualTour(tour);
-
         TourBean out = TourBean.fromModel(tour);
         out.setSessionID(sessionID);
+
+        SessionManagerSingleton.getInstance()
+                .getSession(sessionID)
+                .setActualTour(out);   // SOLO Bean
+
         return out;
     }
 
@@ -97,9 +99,6 @@ public class BookTourController {
         String tourId = resolveTourId(sessionID, bookingBean);
 
         Tour selectedTour = loadTourById(tourId);
-        SessionManagerSingleton.getInstance()
-                .getSession(sessionID)
-                .setActualTour(selectedTour);
 
         TicketDAO ticketDAO = buildTicketDAO();
         enforceNoActiveDuplicate(ticketDAO, userEmail, tourId);
@@ -207,7 +206,6 @@ public class BookTourController {
         new EmailNotificationBoundary().sendNotification(emailBean);
     }
 
-
     private static UserAccount getUserFromSession(String sessionID) throws InvalidFormatException {
         UserAccount user = SessionManagerSingleton.getInstance()
                 .getSession(sessionID)
@@ -240,7 +238,7 @@ public class BookTourController {
         String tourId = bookingBean.getTourID();
         if (tourId != null && !tourId.isBlank()) return tourId;
 
-        Tour fallback = SessionManagerSingleton.getInstance()
+        TourBean fallback = SessionManagerSingleton.getInstance()
                 .getSession(sessionID)
                 .getActualTour();
 
@@ -270,9 +268,7 @@ public class BookTourController {
 
         for (Ticket t : existing) {
             String existingTourId = (t != null && t.getTour() != null) ? t.getTour().getTourID() : null;
-            if (existingTourId == null) {
-                continue; // single continue (allowed by the rule)
-            }
+            if (existingTourId == null) continue;
 
             boolean sameTour = existingTourId.equals(tourId);
             TicketState st = t.getState();

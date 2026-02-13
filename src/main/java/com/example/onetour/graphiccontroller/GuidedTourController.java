@@ -7,7 +7,6 @@ import com.example.onetour.exception.DuplicateTicketException;
 import com.example.onetour.exception.InvalidFormatException;
 import com.example.onetour.exception.TourNotFoundException;
 import com.example.onetour.model.Session;
-import com.example.onetour.model.Tour;
 import com.example.onetour.sessionmanagement.SessionManagerSingleton;
 import com.example.onetour.util.Printer;
 import javafx.collections.FXCollections;
@@ -45,7 +44,7 @@ public class GuidedTourController {
             return;
         }
 
-        Tour actual = session.getActualTour();
+        TourBean actual = session.getActualTour();
         if (actual == null) {
             NavigatorBase.goTo("/fxml/pages/page5_results.fxml");
             return;
@@ -58,14 +57,10 @@ public class GuidedTourController {
                 in.setSessionID(session.getSessionID());
                 in.setTourID(tourId);
 
-                bookTourController.getTourDescription(in);
+                TourBean refreshedBean = bookTourController.getTourDescription(in);
 
-                Tour refreshedModel = SessionManagerSingleton.getInstance()
-                        .getCurrentSession()
-                        .getActualTour();
-
-                if (refreshedModel != null) {
-                    renderTour(refreshedModel);
+                if (refreshedBean != null) {
+                    renderTour(refreshedBean);
                     return;
                 }
             }
@@ -78,8 +73,8 @@ public class GuidedTourController {
         renderTour(actual);
     }
 
-    private void renderTour(Tour t) {
-        tourNameLabel.setText(safe(t.getNameTour(), "Tour"));
+    private void renderTour(TourBean t) {
+        tourNameLabel.setText(safe(t.getTourID(), "Tour"));
         cityLabel.setText(safe(t.getCityName(), "-"));
 
         LocalDate from = t.getDepartureDate();
@@ -95,8 +90,8 @@ public class GuidedTourController {
 
         priceLabel.setText(String.format("%.2f €", t.getPrice()));
 
-        if (t.getTouristGuide() != null && t.getTouristGuide().getName() != null) {
-            guideLabel.setText(t.getTouristGuide().getName());
+        if (t.getGuideName() != null) {
+            guideLabel.setText(t.getGuideName());
         } else {
             guideLabel.setText("-");
         }
@@ -124,7 +119,7 @@ public class GuidedTourController {
                 return;
             }
 
-            Tour actual = session.getActualTour();
+            TourBean actual = session.getActualTour();
             if (actual == null || actual.getTourID() == null || actual.getTourID().isBlank()) {
                 showErrorDialog("Nessun tour selezionato.");
                 NavigatorBase.goTo("/fxml/pages/page5_results.fxml");
@@ -141,7 +136,7 @@ public class GuidedTourController {
             NavigatorBase.goTo("/fxml/pages/page7_bookings.fxml");
 
         } catch (DuplicateTicketException e) {
-            // Errore di dominio previsto → NO stacktrace
+
             Printer.printMessage(
                     "Errore prenotazione: ticket già esistente per questo tour."
             );
@@ -155,7 +150,6 @@ public class GuidedTourController {
             showErrorDialog(e.getMessage());
 
         } catch (Exception e) {
-            // Errore imprevisto → logging severo
             logger.log(Level.SEVERE, e.getMessage(), e);
             statusLabel.setText("Errore durante la prenotazione.");
             showErrorDialog("Errore durante la prenotazione.");

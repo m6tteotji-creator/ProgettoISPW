@@ -18,7 +18,6 @@
             fx:controller="com.example.onetour.graphiccontroller.LoginGraphicController"
             style="-fx-background-color: white;">
 
-    <!-- LOGO in alto a sinistra -->
     <ImageView fitHeight="80" preserveRatio="true"
                AnchorPane.topAnchor="10" AnchorPane.leftAnchor="20">
         <image>
@@ -26,7 +25,6 @@
         </image>
     </ImageView>
 
-    <!-- Testo grande a sinistra (spostato più a destra) -->
     <VBox spacing="8"
           AnchorPane.leftAnchor="180"
           AnchorPane.topAnchor="240">
@@ -35,7 +33,6 @@
         <Label text="HORIZONS" style="-fx-font-size: 44px; -fx-font-family: 'Serif'; -fx-text-fill: #111;"/>
     </VBox>
 
-    <!-- CARD arancione a destra (più bassa) -->
     <StackPane prefWidth="420" prefHeight="360"
                AnchorPane.rightAnchor="90"
                AnchorPane.topAnchor="170">
